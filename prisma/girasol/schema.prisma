@@ -1,0 +1,912 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../node_modules/@prisma/clients/bd_mysql"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("MYSQL_DATABASE_URL")
+}
+
+model anticipos {
+  id                       BigInt              @id @default(autoincrement()) @db.UnsignedBigInt
+  concepto                 String              @db.VarChar(50)
+  bolsa_id                 BigInt              @db.UnsignedBigInt
+  cantidad                 Int                 @db.SmallInt
+  stock                    Int                 @db.SmallInt
+  importe                  Float
+  archivo                  String?             @db.VarChar(255)
+  archivo_token            String?             @db.VarChar(255)
+  archivo_ruta             String?             @db.Text
+  pago_medio               String?             @db.VarChar(50)
+  pago_operacion           String?             @db.VarChar(20)
+  pago_descripcion         String?             @db.VarChar(50)
+  pago_monto               Float?
+  pago_observacion         String?             @db.VarChar(50)
+  pago_fecha               DateTime?           @db.Date
+  user_id                  BigInt              @db.UnsignedBigInt
+  empresa_id               BigInt              @db.UnsignedBigInt
+  codigo_sunat             String?             @db.VarChar(10)
+  ruc_facturacion          String?             @db.VarChar(11)
+  denominacion_facturacion String?             @db.VarChar(255)
+  direccion_facturacion    String?             @db.VarChar(255)
+  ubigeo_facturacion       String?             @db.VarChar(255)
+  serie_id                 BigInt?
+  external_id              String?             @db.VarChar(255)
+  file_name                String?             @db.VarChar(255)
+  hash                     String?             @db.VarChar(255)
+  number                   String?             @db.VarChar(10)
+  number_to_letter         String?             @db.VarChar(255)
+  file_cdr                 String?             @db.Text
+  file_xml                 String?             @db.Text
+  file_pdf                 String?             @db.Text
+  imagen_qr                String?             @db.Text
+  serial_number            String?             @db.VarChar(100)
+  serial                   String?             @db.VarChar(50)
+  message                  String?             @db.VarChar(255)
+  observation              String?             @db.VarChar(255)
+  state_description        String?             @db.VarChar(50)
+  fecha_facturacion        DateTime?           @db.Date
+  activo                   String              @default("NO") @db.Char(2)
+  created_at               DateTime?           @db.Timestamp(0)
+  updated_at               DateTime?           @db.Timestamp(0)
+  bolsas                   bolsas              @relation(fields: [bolsa_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "anticipos_bolsa_id_foreign")
+  empresas                 empresas            @relation(fields: [empresa_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "anticipos_empresa_id_foreign")
+  users                    users               @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "anticipos_user_id_foreign")
+  detalle_anticipos        detalle_anticipos[]
+
+  @@index([bolsa_id], map: "anticipos_bolsa_id_foreign")
+  @@index([empresa_id], map: "anticipos_empresa_id_foreign")
+  @@index([user_id], map: "anticipos_user_id_foreign")
+}
+
+model apis {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  descripcion String    @db.VarChar(255)
+  url         String    @db.Text
+  token       String    @db.Text
+  host        String    @db.Text
+  observacion String?   @db.Text
+  activo      String    @db.Char(2)
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+model archivos {
+  id                       BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id                  BigInt    @db.UnsignedBigInt
+  carpeta_id               BigInt    @db.UnsignedBigInt
+  nombre                   String    @db.Text
+  descripcion              String?   @db.VarChar(255)
+  entidad_id               Int?      @db.UnsignedInt
+  tamanio                  String    @default("0 KB") @db.VarChar(255)
+  archivo                  Bytes     @db.VarBinary(50)
+  archivo_qr               String?   @db.VarChar(50)
+  archivo_cache            String?   @db.VarChar(50)
+  ruta                     String    @db.Text
+  firmado                  Int?      @default(0) @db.SmallInt
+  ruta_firmado             String?   @db.Text
+  codefirma                String?   @db.Text
+  idfirma                  String?   @db.VarChar(255)
+  estado                   String    @default("ACTIVO") @db.VarChar(255)
+  token                    Bytes     @db.VarBinary(100)
+  se_firmo                 String?   @db.Char(2)
+  sello_tiempo             String    @default("NO") @db.Char(2)
+  sello_tiempo_responsable String?   @db.VarChar(255)
+  validado                 String?   @db.Text
+  tipo                     String    @default("D") @db.Char(1)
+  created_at               DateTime? @db.Timestamp(0)
+  updated_at               DateTime? @db.Timestamp(0)
+  carpetas                 carpetas  @relation(fields: [carpeta_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "archivos_carpeta_id_foreign")
+  users                    users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "archivos_user_id_foreign")
+  enlaces                  enlaces[]
+
+  @@index([carpeta_id], map: "archivos_carpeta_id_foreign")
+  @@index([user_id], map: "archivos_user_id_foreign")
+}
+
+model archivoscertificados {
+  id               BigInt       @id @default(autoincrement()) @db.UnsignedBigInt
+  archivo          String       @db.VarChar(255)
+  ruta             String       @db.Text
+  tipo             String       @db.VarChar(20)
+  certificado_id   BigInt       @db.UnsignedBigInt
+  descripcion      String?      @db.VarChar(255)
+  numero_operacion String?      @db.VarChar(255)
+  user_id          BigInt?
+  firma_validar    String?      @db.Text
+  created_at       DateTime?    @db.Timestamp(0)
+  updated_at       DateTime?    @db.Timestamp(0)
+  certificados     certificados @relation(fields: [certificado_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "archivoscertificados_certificado_id_foreign")
+
+  @@index([certificado_id], map: "archivoscertificados_certificado_id_foreign")
+}
+
+model asignarpagos {
+  id                      BigInt         @id @default(autoincrement()) @db.UnsignedBigInt
+  cliente_id              BigInt         @db.UnsignedBigInt
+  catalogopago_id         BigInt         @db.UnsignedBigInt
+  categoria_id            BigInt         @db.UnsignedBigInt
+  precio                  Float?
+  saldo                   Float?
+  precio_anterior         Float?
+  fecha_vencimiento_pago  DateTime?      @db.Date
+  fecha_vencimiento_firma DateTime?      @db.Date
+  anio                    String         @db.Char(4)
+  fecha_pago              DateTime?      @db.Date
+  fecha_contrato          DateTime?      @db.Date
+  observacion             String?        @db.VarChar(100)
+  anulado                 String         @default("NO") @db.Char(2)
+  forma_pago              String?        @db.VarChar(50)
+  banco                   String?        @db.VarChar(50)
+  banco_operacion         String?        @db.VarChar(50)
+  banco_observacion       String?        @db.VarChar(255)
+  archivo                 String?        @db.Text
+  validado                String?        @db.Char(2)
+  notificado              Int?           @db.TinyInt
+  activo                  String         @default("SI") @db.Char(2)
+  created_at              DateTime?      @db.Timestamp(0)
+  updated_at              DateTime?      @db.Timestamp(0)
+  catalogopagos           catalogopagos  @relation(fields: [catalogopago_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "asignarpagos_catalogopago_id_foreign")
+  categorias              categorias     @relation(fields: [categoria_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "asignarpagos_categoria_id_foreign")
+  clientes                clientes       @relation(fields: [cliente_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "asignarpagos_cliente_id_foreign")
+  detallepagos            detallepagos[]
+  firmas                  firmas[]
+
+  @@index([catalogopago_id], map: "asignarpagos_catalogopago_id_foreign")
+  @@index([categoria_id], map: "asignarpagos_categoria_id_foreign")
+  @@index([cliente_id], map: "asignarpagos_cliente_id_foreign")
+}
+
+model avisos {
+  id             BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id        BigInt   @db.UnsignedBigInt
+  titulo         String   @db.VarChar(100)
+  mensaje        String?  @db.Text
+  archivo        String?  @db.VarChar(255)
+  archivo_nombre String?  @db.VarChar(255)
+  archivo_ruta   String?  @db.VarChar(255)
+  archivo_token  String?  @db.VarChar(255)
+  fecha_inicio   DateTime @db.Date
+  fecha_fin      DateTime @db.Date
+  tiempo         Int?     @db.SmallInt
+  link           String?  @db.Text
+  users          users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "avisos_user_id_foreign")
+
+  @@index([user_id], map: "avisos_user_id_foreign")
+}
+
+model billings {
+  id                     BigInt       @id @default(autoincrement()) @db.UnsignedBigInt
+  certificado_id         BigInt       @db.UnsignedBigInt
+  serie_id               BigInt?
+  external_id            String?      @db.VarChar(255)
+  file_name              String?      @db.VarChar(100)
+  hash                   String?      @db.VarChar(100)
+  number                 String?      @db.VarChar(10)
+  number_to_letter       String?      @db.VarChar(255)
+  file_cdr               String?      @db.Text
+  file_xml               String?      @db.Text
+  file_pdf               String?      @db.Text
+  image_qr               String?      @db.Text
+  serial_number          String?      @db.VarChar(100)
+  serial                 String?      @db.VarChar(50)
+  message                String?      @db.VarChar(255)
+  observation            String?      @db.VarChar(255)
+  state_type_description String?      @db.VarChar(50)
+  created_at             DateTime?    @db.Timestamp(0)
+  updated_at             DateTime?    @db.Timestamp(0)
+  certificados           certificados @relation(fields: [certificado_id], references: [id], onUpdate: Restrict, map: "billings_certificado_id_foreign")
+
+  @@index([certificado_id], map: "billings_certificado_id_foreign")
+}
+
+model bolsas {
+  id                 BigInt           @id @default(autoincrement()) @db.UnsignedBigInt
+  nombre             String           @db.VarChar(50)
+  descripcion        String?          @db.VarChar(255)
+  cantidad           Int              @db.SmallInt
+  precio_unidad      Float
+  importe            Float
+  tipocertificado_id BigInt           @db.UnsignedBigInt
+  created_at         DateTime?        @db.Timestamp(0)
+  updated_at         DateTime?        @db.Timestamp(0)
+  anticipos          anticipos[]
+  tipocertificados   tipocertificados @relation(fields: [tipocertificado_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "bolsas_tipocertificado_id_foreign")
+
+  @@index([tipocertificado_id], map: "bolsas_tipocertificado_id_foreign")
+}
+
+model carpetas {
+  id          BigInt        @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id     BigInt        @db.UnsignedBigInt
+  empresa_id  BigInt?
+  nombre      String        @db.VarChar(255)
+  descripcion String?       @db.Text
+  archivos    Int           @default(0)
+  tipo        String        @default("D") @db.Char(1)
+  created_at  DateTime?     @db.Timestamp(0)
+  updated_at  DateTime?     @db.Timestamp(0)
+  archivos_list  archivos[]
+  users       users         @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "carpetas_user_id_foreign")
+  compartidos compartidos[]
+  enlaces     enlaces[]
+
+  @@index([user_id], map: "carpetas_user_id_foreign")
+}
+
+model catalogopagos {
+  id                      BigInt         @id @default(autoincrement()) @db.UnsignedBigInt
+  concepto                String         @db.VarChar(100)
+  descripcion             String?        @db.VarChar(255)
+  precio                  Float
+  tipo                    String?        @db.VarChar(50)
+  cantidad_firma          Int?
+  anio                    String?        @db.Char(4)
+  fecha_vencimiento_pago  DateTime?      @db.Date
+  fecha_vencimiento_firma DateTime?      @db.Date
+  categoria_id            BigInt         @db.UnsignedBigInt
+  created_at              DateTime?      @db.Timestamp(0)
+  updated_at              DateTime?      @db.Timestamp(0)
+  asignarpagos            asignarpagos[]
+  categorias              categorias     @relation(fields: [categoria_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "catalogopagos_categoria_id_foreign")
+  detallepagos            detallepagos[]
+
+  @@index([categoria_id], map: "catalogopagos_categoria_id_foreign")
+}
+
+model categorias {
+  id            BigInt          @id @default(autoincrement()) @db.UnsignedBigInt
+  descripcion   String          @db.VarChar(100)
+  created_at    DateTime?       @db.Timestamp(0)
+  updated_at    DateTime?       @db.Timestamp(0)
+  asignarpagos  asignarpagos[]
+  catalogopagos catalogopagos[]
+}
+
+model certificados {
+  id                       BigInt                 @id @default(autoincrement()) @db.UnsignedBigInt
+  contador                 Int?
+  anio                     String?                @db.VarChar(6)
+  numero_documento         String?                @db.VarChar(15)
+  denominacion             String?                @db.VarChar(150)
+  direccion_fiscal         String?                @db.VarChar(150)
+  pais                     String?                @db.VarChar(50)
+  ubigeo                   String?                @db.VarChar(10)
+  departamento             String?                @db.VarChar(50)
+  provincia                String?                @db.VarChar(50)
+  distrito                 String?                @db.VarChar(50)
+  eres_representante       String?                @default("NO") @db.Char(2)
+  dni_representante        String?                @db.VarChar(16)
+  nombre_representante     String?                @db.VarChar(150)
+  tipodocumento_id         Int
+  numero_documento_titular String                 @db.VarChar(15)
+  nombre_completo          String                 @db.VarChar(150)
+  cargo                    String?                @db.VarChar(255)
+  area                     String?                @db.VarChar(255)
+  email_envio              String                 @db.VarChar(50)
+  telefono_codigo          String                 @db.VarChar(9)
+  telefono_validacion      String?                @db.VarChar(100)
+  tipocertificado_id       Int                    @db.UnsignedInt
+  tipodocumento_sunat      BigInt?
+  rucfacturacion           String?                @db.VarChar(15)
+  denominacion_facturacion String?                @db.VarChar(150)
+  direccion_facturacion    String?                @db.VarChar(150)
+  ubigeo_facturacion       String?                @db.VarChar(8)
+  acepto_contrato          String?                @db.Char(2)
+  periodo_certificado      Int                    @db.SmallInt
+  fecha_solicitud          DateTime               @db.DateTime(0)
+  fecha_inicio             DateTime?              @db.DateTime(0)
+  fecha_vencimiento        DateTime?              @db.DateTime(0)
+  archivo_cer              String?                @db.Text
+  token_cer                String?                @db.Text
+  certificado_anterior_id  Int?                   @db.UnsignedInt
+  empresa_id               BigInt                 @db.UnsignedBigInt
+  rne_rna                  String?                @db.VarChar(50)
+  numero_colegiatura       String?                @db.VarChar(50)
+  poder                    String?                @default("0") @db.Char(2)
+  rne                      String?                @db.VarChar(10)
+  costo                    Float?
+  fecha_llamada            DateTime?              @db.DateTime(0)
+  estado_llamada           String?                @db.Char(2)
+  link_video_llamada       String?                @db.Text
+  operador                 BigInt?                @default(1)
+  observacion              String?                @db.Text
+  observacion_voucher      String                 @default("NO") @db.Char(2)
+  codec                    String?                @db.VarChar(50)
+  anulado                  String                 @default("NO") @db.Char(2)
+  token_criptografico      String                 @default("NO") @db.Char(2)
+  fecha_voucher            DateTime?              @db.DateTime(0)
+  renovado                 String                 @default("NO") @db.Char(2)
+  verificado               String                 @default("NO") @db.Char(2)
+  observacion_operador     String?                @db.Text
+  descuento_cer            String                 @default("NO") @db.Char(2)
+  descuento                Float?
+  descuento_autorizado     String?                @db.VarChar(255)
+  created_at               DateTime?              @db.Timestamp(0)
+  updated_at               DateTime?              @db.Timestamp(0)
+  archivoscertificados     archivoscertificados[]
+  billings                 billings[]
+  empresas                 empresas               @relation(fields: [empresa_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "certificados_empresa_id_foreign")
+  revocar_incidencias      revocar_incidencias[]
+
+  @@index([empresa_id], map: "certificados_empresa_id_foreign")
+}
+
+model clientes {
+  id                      BigInt         @id @default(autoincrement()) @db.UnsignedBigInt
+  tipodocumento_sunat     Int            @db.UnsignedInt
+  numero_documento        String         @db.VarChar(20)
+  razonsocial             String         @db.VarChar(100)
+  direccion               String         @db.VarChar(150)
+  email                   String         @db.VarChar(50)
+  telefono                String?        @db.VarChar(20)
+  user_id                 BigInt         @db.UnsignedBigInt
+  tipocliente_id          BigInt         @db.UnsignedBigInt
+  fecha_inicio            DateTime?      @db.Date
+  ubigeo                  String?        @db.VarChar(50)
+  baja                    String         @default("NO") @db.Char(2)
+  motivo_baja             String?        @db.VarChar(100)
+  certificado_vencimiento DateTime?      @db.Date
+  archivo_pfx             String?        @db.VarChar(50)
+  archivo_txt             String?        @db.VarChar(50)
+  archivo_ruta            String?        @db.VarChar(100)
+  created_at              DateTime?      @db.Timestamp(0)
+  updated_at              DateTime?      @db.Timestamp(0)
+  asignarpagos            asignarpagos[]
+  tipoclientes            tipoclientes   @relation(fields: [tipocliente_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "clientes_tipocliente_id_foreign")
+  users                   users          @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "clientes_user_id_foreign")
+  facturacions            facturacions[]
+  pagos                   pagos[]
+
+  @@index([tipocliente_id], map: "clientes_tipocliente_id_foreign")
+  @@index([user_id], map: "clientes_user_id_foreign")
+}
+
+model compartidos {
+  id                 BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id            BigInt    @db.UnsignedBigInt
+  carpeta_id         BigInt    @db.UnsignedBigInt
+  user_email_destino String    @db.VarChar(100)
+  estado             String    @db.VarChar(20)
+  tipo               String    @default("D") @db.Char(1)
+  created_at         DateTime? @db.Timestamp(0)
+  updated_at         DateTime? @db.Timestamp(0)
+  carpetas           carpetas  @relation(fields: [carpeta_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "compartidos_carpeta_id_foreign")
+  users              users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "compartidos_user_id_foreign")
+
+  @@index([carpeta_id], map: "compartidos_carpeta_id_foreign")
+  @@index([user_id], map: "compartidos_user_id_foreign")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model departments {
+  id          String? @db.VarChar(8)
+  description String? @db.VarChar(50)
+
+  @@ignore
+}
+
+model detalle_anticipos {
+  id             BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  anticipo_id    BigInt    @db.UnsignedBigInt
+  certificado_id BigInt?
+  activo         String    @default("SI") @db.Char(2)
+  created_at     DateTime? @db.Timestamp(0)
+  updated_at     DateTime? @db.Timestamp(0)
+  anticipos      anticipos @relation(fields: [anticipo_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "detalle_anticipos_anticipo_id_foreign")
+
+  @@index([anticipo_id], map: "detalle_anticipos_anticipo_id_foreign")
+}
+
+model detallepagos {
+  id              BigInt        @id @default(autoincrement()) @db.UnsignedBigInt
+  cantidad        Int?
+  monto           Float?
+  importe         Float?
+  catalogopago_id BigInt        @db.UnsignedBigInt
+  asignarpago_id  BigInt        @db.UnsignedBigInt
+  pago_id         BigInt        @db.UnsignedBigInt
+  cliente_id      BigInt
+  anulado         String        @default("NO") @db.Char(2)
+  created_at      DateTime?     @db.Timestamp(0)
+  updated_at      DateTime?     @db.Timestamp(0)
+  asignarpagos    asignarpagos  @relation(fields: [asignarpago_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "detallepagos_asignarpago_id_foreign")
+  catalogopagos   catalogopagos @relation(fields: [catalogopago_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "detallepagos_catalogopago_id_foreign")
+  pagos           pagos         @relation(fields: [pago_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "detallepagos_pago_id_foreign")
+
+  @@index([asignarpago_id], map: "detallepagos_asignarpago_id_foreign")
+  @@index([catalogopago_id], map: "detallepagos_catalogopago_id_foreign")
+  @@index([pago_id], map: "detallepagos_pago_id_foreign")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model districts {
+  id          String? @db.VarChar(8)
+  province_id String? @db.VarChar(8)
+  description String? @db.VarChar(100)
+  active      String? @db.Char(2)
+
+  @@ignore
+}
+
+model empresas {
+  id                 BigInt         @id @default(autoincrement()) @db.UnsignedBigInt
+  nombre             String         @db.VarChar(100)
+  numero_documento   String         @db.VarChar(15)
+  direccion_fiscal   String?        @db.VarChar(150)
+  email              String         @db.VarChar(100)
+  certificado        String?        @db.Char(2)
+  nombre_certificado String?        @db.VarChar(100)
+  persona_contacto   String         @db.VarChar(100)
+  pagina_web         String?        @db.VarChar(100)
+  firma_email        String?        @db.Text
+  tipodocumento_id   Int            @db.UnsignedInt
+  user_id            BigInt         @db.UnsignedBigInt
+  created_at         DateTime?      @db.Timestamp(0)
+  updated_at         DateTime?      @db.Timestamp(0)
+  anticipos          anticipos[]
+  certificados       certificados[]
+  users              users          @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "empresas_user_id_foreign")
+
+  @@index([user_id], map: "empresas_user_id_foreign")
+}
+
+model enlaces {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id    BigInt    @db.UnsignedBigInt
+  carpeta_id BigInt?   @db.UnsignedBigInt
+  archivo_id BigInt?   @db.UnsignedBigInt
+  token      String    @db.VarChar(100)
+  enlace     String?   @db.Text
+  tiempo     Int       @default(1) @db.SmallInt
+  estado     String    @db.VarChar(20)
+  tipo       String    @default("D") @db.Char(1)
+  img_firma  String?   @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  archivos   archivos? @relation(fields: [archivo_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "enlaces_archivo_id_foreign")
+  carpetas   carpetas? @relation(fields: [carpeta_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "enlaces_carpeta_id_foreign")
+  users      users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "enlaces_user_id_foreign")
+
+  @@index([archivo_id], map: "enlaces_archivo_id_foreign")
+  @@index([carpeta_id], map: "enlaces_carpeta_id_foreign")
+  @@index([user_id], map: "enlaces_user_id_foreign")
+}
+
+model entidads {
+  id                    BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  tipodocumento_id      BigInt
+  user_id               BigInt    @db.UnsignedBigInt
+  numero_documento      String    @db.VarChar(20)
+  nombre                String    @db.VarChar(150)
+  nombre_comercial      String    @db.VarChar(100)
+  direccion_fiscal      String    @db.VarChar(150)
+  telefono              String    @db.VarChar(18)
+  email_principal       String    @db.VarChar(60)
+  email_2               String?   @db.VarChar(60)
+  email_3               String?   @db.VarChar(60)
+  asociar               String    @default("NO") @db.Char(2)
+  prefijo_personalizado String?   @db.VarChar(50)
+  created_at            DateTime? @db.Timestamp(0)
+  updated_at            DateTime? @db.Timestamp(0)
+  users                 users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "entidads_user_id_foreign")
+
+  @@index([user_id], map: "entidads_user_id_foreign")
+}
+
+model facturacions {
+  id               BigInt         @id @default(autoincrement()) @db.UnsignedBigInt
+  tipodocumento_id BigInt         @db.UnsignedBigInt
+  codigo_sunat     String?        @db.VarChar(5)
+  numero_documento String?        @db.VarChar(15)
+  razon_social     String?        @db.VarChar(255)
+  direccion        String?        @db.VarChar(255)
+  activo           String         @default("SI") @db.Char(2)
+  user_id          BigInt         @db.UnsignedBigInt
+  cliente_id       BigInt         @db.UnsignedBigInt
+  ubigeo           String?        @db.VarChar(10)
+  clientes         clientes       @relation(fields: [cliente_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "facturacions_cliente_id_foreign")
+  tipodocumentos   tipodocumentos @relation(fields: [tipodocumento_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "facturacions_tipodocumento_id_foreign")
+  users            users          @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "facturacions_user_id_foreign")
+
+  @@index([cliente_id], map: "facturacions_cliente_id_foreign")
+  @@index([tipodocumento_id], map: "facturacions_tipodocumento_id_foreign")
+  @@index([user_id], map: "facturacions_user_id_foreign")
+}
+
+model failed_jobs {
+  id         BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  connection String   @db.Text
+  queue      String   @db.Text
+  payload    String   @db.LongText
+  exception  String   @db.LongText
+  failed_at  DateTime @default(now()) @db.Timestamp(0)
+}
+
+model firmas {
+  id             BigInt             @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id        BigInt             @db.UnsignedBigInt
+  numero_firmas  Int?
+  plan_firmas    Int
+  asignarpago_id BigInt             @db.UnsignedBigInt
+  tipo_firma     firmas_tipo_firma?
+  anio           String?            @db.VarChar(4)
+  mes            String?            @db.VarChar(2)
+  created_at     DateTime?          @db.Timestamp(0)
+  updated_at     DateTime?          @db.Timestamp(0)
+  asignarpagos   asignarpagos       @relation(fields: [asignarpago_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "firmas_asignarpago_id_foreign")
+  users          users              @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "firmas_user_id_foreign")
+
+  @@index([asignarpago_id], map: "firmas_asignarpago_id_foreign")
+  @@index([user_id], map: "firmas_user_id_foreign")
+}
+
+model historialcertificados {
+  id             BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  estado         String    @db.VarChar(40)
+  codigo         String?   @db.Char(1)
+  activo         String?   @db.Char(2)
+  comentario     String    @db.VarChar(100)
+  certificado_id Int       @db.UnsignedInt
+  created_at     DateTime? @db.Timestamp(0)
+  updated_at     DateTime? @db.Timestamp(0)
+}
+
+model historials {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  estado     String    @db.VarChar(50)
+  archivo_id Int?      @db.UnsignedInt
+  carpeta_id Int?      @db.UnsignedInt
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model mensajes {
+  id             BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
+  titulo         String  @db.VarChar(255)
+  mensaje        String  @db.Text
+  nombre_archivo String? @db.VarChar(255)
+  token          String? @db.VarChar(255)
+  link           String? @db.Text
+  activo         String  @default("SI") @db.Char(2)
+}
+
+model migrations {
+  id        Int    @id @default(autoincrement()) @db.UnsignedInt
+  migration String @db.VarChar(255)
+  batch     Int
+}
+
+model model_has_permissions {
+  permission_id BigInt      @db.UnsignedBigInt
+  model_type    String      @db.VarChar(255)
+  model_id      BigInt      @db.UnsignedBigInt
+  permissions   permissions @relation(fields: [permission_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "model_has_permissions_permission_id_foreign")
+
+  @@id([permission_id, model_id, model_type])
+  @@index([model_id, model_type], map: "model_has_permissions_model_id_model_type_index")
+}
+
+model model_has_roles {
+  role_id    BigInt @db.UnsignedBigInt
+  model_type String @db.VarChar(255)
+  model_id   BigInt @db.UnsignedBigInt
+  roles      roles  @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "model_has_roles_role_id_foreign")
+
+  @@id([role_id, model_id, model_type])
+  @@index([model_id, model_type], map: "model_has_roles_model_id_model_type_index")
+}
+
+model pagocertificados {
+  id               BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  certificado_id   BigInt
+  empresa_id       BigInt
+  user_id          BigInt
+  medio_pago       String    @db.VarChar(50)
+  numero_operacion String    @db.VarChar(20)
+  descripcion      String?   @db.VarChar(255)
+  monto            Float
+  observacion      String?   @db.VarChar(255)
+  fecha_pago       DateTime? @db.Date
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+}
+
+model pagos {
+  id                       BigInt         @id @default(autoincrement()) @db.UnsignedBigInt
+  fecha_emision            DateTime?      @db.Date
+  subtotal                 Float?
+  igv                      Float?
+  total                    Float?
+  forma_pago               String?        @db.VarChar(50)
+  numero_operacion         String?        @db.VarChar(50)
+  tipodocumento_sunat      Int?           @db.UnsignedInt
+  numerodoc_facturacion    String?        @db.VarChar(15)
+  denominacion_facturacion String?        @db.VarChar(255)
+  cliente_id               BigInt         @db.UnsignedBigInt
+  serie_id                 Int?           @db.UnsignedInt
+  external_id              String?        @db.VarChar(255)
+  file_name                String?        @db.VarChar(100)
+  hash                     String?        @db.VarChar(100)
+  number                   String?        @db.VarChar(10)
+  number_to_letter         String?        @db.VarChar(255)
+  file_cdr                 String?        @db.Text
+  file_xml                 String?        @db.Text
+  file_pdf                 String?        @db.Text
+  image_qr                 String?        @db.Text
+  serial_number            String?        @db.VarChar(100)
+  serial                   String?        @db.VarChar(50)
+  state_sunat              String?        @db.VarChar(50)
+  message_sunat            String?        @db.VarChar(150)
+  anulado                  String?        @db.Char(2)
+  observacion              String?        @db.VarChar(255)
+  ticket_anulado           String?        @db.VarChar(50)
+  external_id_anulado      String?        @db.VarChar(50)
+  codigo_anulado           String?        @db.VarChar(50)
+  mensaje_anulado          String?        @db.VarChar(255)
+  xml_anulado              String?        @db.Text
+  cdr_anulado              String?        @db.Text
+  created_at               DateTime?      @db.Timestamp(0)
+  updated_at               DateTime?      @db.Timestamp(0)
+  detallepagos             detallepagos[]
+  clientes                 clientes       @relation(fields: [cliente_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "pagos_cliente_id_foreign")
+
+  @@index([cliente_id], map: "pagos_cliente_id_foreign")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model password_resets {
+  email      String    @db.VarChar(255)
+  token      String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+
+  @@index([email], map: "password_resets_email_index")
+  @@ignore
+}
+
+model permissions {
+  id                    BigInt                  @id @default(autoincrement()) @db.UnsignedBigInt
+  name                  String                  @db.VarChar(255)
+  guard_name            String                  @db.VarChar(255)
+  created_at            DateTime?               @db.Timestamp(0)
+  updated_at            DateTime?               @db.Timestamp(0)
+  model_has_permissions model_has_permissions[]
+  role_has_permissions  role_has_permissions[]
+
+  @@unique([name, guard_name], map: "permissions_name_guard_name_unique")
+}
+
+model plancertificados {
+  id                 BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  nombre             String    @db.VarChar(100)
+  precio_base        Float
+  precio_venta       Float
+  periodo            Int       @db.SmallInt
+  comentario         String?   @db.VarChar(100)
+  tipocertificado_id Int       @db.UnsignedInt
+  tipouser_id        Int       @db.UnsignedInt
+  created_at         DateTime? @db.Timestamp(0)
+  updated_at         DateTime? @db.Timestamp(0)
+}
+
+model posiconfirmas {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  carpeta_id BigInt?
+  enlace_id  BigInt?
+  eje_x      String?   @db.VarChar(10)
+  eje_y      String?   @db.VarChar(10)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model provinces {
+  id            String? @db.VarChar(8)
+  department_id String? @db.VarChar(8)
+  description   String? @db.VarChar(50)
+  active        String? @db.Char(2)
+
+  @@ignore
+}
+
+model publicidads {
+  id                   BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id              BigInt
+  tipo_cliente         String? @db.VarChar(100)
+  recibir_notificacion String  @default("SI") @db.Char(2)
+  notificado           Int?    @default(0) @db.TinyInt
+  mensaje_id           BigInt?
+}
+
+model revocar_incidencias {
+  id                     BigInt       @id @default(autoincrement()) @db.UnsignedBigInt
+  certificado_id         BigInt       @db.UnsignedBigInt
+  codigo_pedido          String       @db.VarChar(100)
+  operador               BigInt
+  fecha                  DateTime     @db.DateTime(0)
+  motivo                 String       @db.Text
+  observacion_revocacion String?      @db.Text
+  created_at             DateTime?    @db.Timestamp(0)
+  updated_at             DateTime?    @db.Timestamp(0)
+  certificados           certificados @relation(fields: [certificado_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "revocar_incidencias_certificado_id_foreign")
+
+  @@index([certificado_id], map: "revocar_incidencias_certificado_id_foreign")
+}
+
+model role_has_permissions {
+  permission_id BigInt      @db.UnsignedBigInt
+  role_id       BigInt      @db.UnsignedBigInt
+  permissions   permissions @relation(fields: [permission_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "role_has_permissions_permission_id_foreign")
+  roles         roles       @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "role_has_permissions_role_id_foreign")
+
+  @@id([permission_id, role_id])
+  @@index([role_id], map: "role_has_permissions_role_id_foreign")
+}
+
+model roles {
+  id                   BigInt                 @id @default(autoincrement()) @db.UnsignedBigInt
+  name                 String                 @db.VarChar(255)
+  guard_name           String                 @db.VarChar(255)
+  created_at           DateTime?              @db.Timestamp(0)
+  updated_at           DateTime?              @db.Timestamp(0)
+  model_has_roles      model_has_roles[]
+  role_has_permissions role_has_permissions[]
+
+  @@unique([name, guard_name], map: "roles_name_guard_name_unique")
+}
+
+model seriebillings {
+  id                   BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  description          String    @db.VarChar(50)
+  typedocument_id      String    @db.Char(2)
+  affected_igv         String    @db.Char(2)
+  affected_description String?   @db.VarChar(255)
+  active               String    @db.Char(2)
+  created_at           DateTime? @db.Timestamp(0)
+  updated_at           DateTime? @db.Timestamp(0)
+}
+
+model settings {
+  id          BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
+  description String? @db.VarChar(50)
+  value       String? @db.VarChar(255)
+  alternative String? @db.VarChar(255)
+  active      String  @default("SI") @db.Char(2)
+}
+
+model tipocertificados {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  nombre      String    @db.VarChar(100)
+  titulo      String    @db.VarChar(50)
+  descripcion String    @db.VarChar(100)
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+  bolsas      bolsas[]
+}
+
+model tipoclientes {
+  id          BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
+  descripcion String     @db.VarChar(50)
+  created_at  DateTime?  @db.Timestamp(0)
+  updated_at  DateTime?  @db.Timestamp(0)
+  clientes    clientes[]
+}
+
+model tipodocumentos {
+  id           BigInt         @id @default(autoincrement()) @db.UnsignedBigInt
+  descripcion  String         @db.VarChar(60)
+  codigo_sunat String?        @db.Char(1)
+  activo       String?        @db.Char(2)
+  created_at   DateTime?      @db.Timestamp(0)
+  updated_at   DateTime?      @db.Timestamp(0)
+  facturacions facturacions[]
+}
+
+model tipousers {
+  id          BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  descripcion String    @db.VarChar(50)
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model typedocuments {
+  id          String    @db.Char(2)
+  active      String    @db.Char(2)
+  short       String?   @db.VarChar(10)
+  description String?   @default("text") @db.VarChar(100)
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+
+  @@ignore
+}
+
+model users {
+  id                BigInt         @id @default(autoincrement()) @db.UnsignedBigInt
+  name              String         @db.VarChar(255)
+  phone             String?        @db.Char(9)
+  email             String         @unique(map: "users_email_unique") @db.VarChar(255)
+  email_verified_at DateTime?      @db.Timestamp(0)
+  password          String         @db.VarChar(255)
+  secret            String         @db.VarChar(255)
+  tipodocumento_id  Int            @db.UnsignedInt
+  document_number   String         @unique(map: "users_document_number_unique") @db.VarChar(20)
+  tipouser_id       Int            @db.UnsignedInt
+  user_depende      Int?
+  codigo_afiliacion String?        @db.VarChar(10)
+  status            String?        @db.VarChar(20)
+  empresa_id        Int?           @db.UnsignedInt
+  remember_token    String?        @db.VarChar(100)
+  activo            String         @default("SI") @db.Char(2)
+  sellos            Int?           @db.SmallInt
+  token_soporte     String?        @db.VarChar(255)
+  img_firma         String?        @db.VarChar(255)
+  created_at        DateTime?      @db.Timestamp(0)
+  updated_at        DateTime?      @db.Timestamp(0)
+  anticipos         anticipos[]
+  archivos          archivos[]
+  avisos            avisos[]
+  carpetas          carpetas[]
+  clientes          clientes[]
+  compartidos       compartidos[]
+  empresas          empresas[]
+  enlaces           enlaces[]
+  entidads          entidads[]
+  facturacions      facturacions[]
+  firmas            firmas[]
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model vdeudaresellers {
+  id                     BigInt?   @db.UnsignedBigInt
+  cliente_id             BigInt?   @db.UnsignedBigInt
+  cliente_name           String?   @db.VarChar(100)
+  cliente_email          String?   @db.VarChar(50)
+  cliente_telefono       String?   @db.VarChar(20)
+  user_id                BigInt?   @db.UnsignedBigInt
+  user_name              String?   @db.VarChar(255)
+  reseller_id            Int?
+  reseller_name          String?   @db.VarChar(255)
+  reseller_email         String?   @db.VarChar(255)
+  reseller_phone         String?   @db.Char(9)
+  precio                 Float?
+  saldo                  Float?
+  categoria_id           BigInt?   @db.UnsignedBigInt
+  plan                   String?   @db.VarChar(100)
+  catalogopago_id        BigInt?   @db.UnsignedBigInt
+  concepto               String?   @db.VarChar(100)
+  fecha_vencimiento_pago DateTime? @db.Date
+  notificado             Int?      @db.TinyInt
+  anio                   String?   @db.Char(4)
+
+  @@ignore
+}
+
+model ventas {
+  id                    BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  nombres               String    @db.VarChar(255)
+  email                 String    @db.VarChar(255)
+  telefono              String    @db.VarChar(255)
+  numero_documento      String    @db.VarChar(15)
+  informacion_adicional String?   @db.Text
+  user_id               BigInt?   @db.UnsignedBigInt
+  estado                String    @default("ACTIVO") @db.VarChar(20)
+  created_at            DateTime? @db.Timestamp(0)
+  updated_at            DateTime? @db.Timestamp(0)
+}
+
+model webinars {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  nombre     String    @db.VarChar(100)
+  telefono   String    @db.VarChar(10)
+  email      String    @db.VarChar(100)
+  mensaje    String?   @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+enum firmas_tipo_firma {
+  PREPAGO
+  POSTPAGO
+}

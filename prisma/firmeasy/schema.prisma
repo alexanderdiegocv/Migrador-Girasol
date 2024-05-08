@@ -1,0 +1,1389 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../node_modules/@prisma/clients/bd_postgres"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_DATABASE_URL")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model anticipos {
+  id                                     BigInt              @id @default(autoincrement())
+  bolsa_id                               BigInt
+  cliente_user_id                        BigInt
+  cantidad                               Int                 @db.SmallInt
+  stock                                  Int                 @db.SmallInt
+  subtotal                               Float?
+  igv                                    Float?
+  total                                  Float?
+  archivo                                String?             @db.VarChar(100)
+  archivo_token                          String?             @db.VarChar(255)
+  archivo_ruta                           String?
+  pago_medio                             String?             @db.VarChar(50)
+  pago_operacion                         String?             @db.VarChar(20)
+  pago_descripcion                       String?             @db.VarChar(50)
+  pago_monto                             Float?
+  pago_observacion                       String?             @db.VarChar(100)
+  pago_fecha                             DateTime?           @db.Date
+  codigo_sunat                           String?             @db.VarChar(10)
+  documento_facturacion                  String?             @db.VarChar(11)
+  denominacion_facturacion               String?             @db.VarChar(255)
+  direccion_facturacion                  String?             @db.VarChar(150)
+  ubigeo_facturacion                     String?             @db.VarChar(6)
+  departamento                           String?             @db.VarChar(100)
+  provincia                              String?             @db.VarChar(100)
+  distrito                               String?             @db.VarChar(100)
+  serie_id                               BigInt?
+  external_id                            String?             @db.VarChar(255)
+  file_name                              String?             @db.VarChar(255)
+  hash                                   String?             @db.VarChar(255)
+  number                                 String?             @db.VarChar(10)
+  number_to_letter                       String?             @db.VarChar(255)
+  file_cdr                               String?
+  file_xml                               String?
+  file_pdf                               String?
+  imagen_qr                              String?
+  serial_number                          String?             @db.VarChar(100)
+  serial                                 String?             @db.VarChar(50)
+  state_sunat                            String?             @db.VarChar(50)
+  message_sunat                          String?             @db.VarChar(150)
+  observacion                            String?             @db.VarChar(255)
+  anulado                                String              @default("NO") @db.Char(2)
+  ticket_anulado                         String?             @db.VarChar(50)
+  external_id_anulado                    String?             @db.VarChar(50)
+  codigo_anulado                         String?             @db.VarChar(50)
+  mensaje_anulado                        String?             @db.VarChar(255)
+  xml_anulado                            String?
+  cdr_anulado                            String?
+  fecha_emision                          DateTime?           @db.Date
+  uso                                    String              @default("NO") @db.Char(2)
+  activo                                 String              @default("S") @db.Char(1)
+  user_id                                BigInt
+  created_at                             DateTime?           @db.Timestamp(0)
+  updated_at                             DateTime?           @db.Timestamp(0)
+  bolsas                                 bolsas              @relation(fields: [bolsa_id], references: [id], onUpdate: NoAction, map: "anticipos_bolsa_id_foreign")
+  users_anticipos_cliente_user_idTousers users               @relation("anticipos_cliente_user_idTousers", fields: [cliente_user_id], references: [id], onUpdate: NoAction, map: "anticipos_cliente_user_id_foreign")
+  series                                 series?             @relation(fields: [serie_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "anticipos_serie_id_foreign")
+  users_anticipos_user_idTousers         users               @relation("anticipos_user_idTousers", fields: [user_id], references: [id], onUpdate: NoAction, map: "anticipos_user_id_foreign")
+  detalle_anticipos                      detalle_anticipos[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model apis {
+  id         BigInt    @id @default(autoincrement())
+  nombre     String    @db.VarChar(255)
+  host       String?   @db.VarChar(255)
+  url        String    @db.VarChar(255)
+  token      String    @db.VarChar(255)
+  detalle    String?   @db.VarChar(255)
+  activo     String    @default("S") @db.Char(1)
+  user_id    BigInt
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  users      users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "apis_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model archivo_certificados {
+  id               BigInt       @id @default(autoincrement())
+  certificado_id   BigInt
+  file_nombre      String       @db.VarChar(255)
+  file_ruta        String       @db.VarChar(255)
+  file_token       String?      @db.VarChar(255)
+  tipo             String       @db.VarChar(50)
+  numero_operacion String?      @db.VarChar(50)
+  firma_validar    String?
+  detalle          String?      @db.VarChar(255)
+  activo           String       @default("S") @db.Char(1)
+  user_id          BigInt
+  created_at       DateTime?    @db.Timestamp(0)
+  updated_at       DateTime?    @db.Timestamp(0)
+  file_imagen_qr   String?      @db.VarChar(255)
+  file             String?      @db.VarChar(50)
+  file_qr          String?      @db.VarChar(50)
+  file_code        String?      @db.VarChar(15)
+  file_old         String?      @db.VarChar(50)
+  certificados     certificados @relation(fields: [certificado_id], references: [id], onUpdate: NoAction, map: "archivo_certificados_certificado_id_foreign")
+  users            users        @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "archivo_certificados_user_id_foreign")
+}
+
+model archivo_firmantes {
+  id                     BigInt    @id @default(autoincrement())
+  archivo_id             BigInt
+  nombre                 String    @db.VarChar(255)
+  celular                String?   @db.VarChar(255)
+  codigo_pais            String?   @db.VarChar(255)
+  email                  String?   @db.VarChar(255)
+  link                   String?   @db.VarChar(255)
+  firmado                Boolean   @default(false)
+  signed_document        String?   @db.VarChar(255)
+  hora                   DateTime? @db.Time(0)
+  fecha                  DateTime? @db.Date
+  token                  String?   @db.VarChar(255)
+  activo                 String    @default("S") @db.VarChar(255)
+  imagen                 String?   @db.VarChar(255)
+  created_at             DateTime? @db.Timestamp(0)
+  updated_at             DateTime? @db.Timestamp(0)
+  identifier             String?   @db.VarChar(255)
+  authCode               String?   @db.VarChar(6)
+  OTPSend                Boolean   @default(false)
+  OTPWhatsapp            Boolean   @default(false)
+  OTPSMS                 Boolean   @default(false)
+  fecha_acceso_enlace    DateTime? @db.Timestamp(0)
+  fecha_recepcion_otp    DateTime? @db.Timestamp(0)
+  fecha_verificacion_otp DateTime? @db.Timestamp(0)
+  fecha_inicio_firma     DateTime? @db.Timestamp(0)
+  fecha_fin_firma        DateTime? @db.Timestamp(0)
+  Biometrico             Boolean   @default(false)
+  imagen_dni_anverso     String?   @db.VarChar(255)
+  imagen_dni_reverso     String?   @db.VarChar(255)
+  imagen_firmante        String?   @db.VarChar(255)
+  link_expiration        Int?
+  signer_identification  String?   @db.VarChar(50)
+  id_api                 String?   @unique(map: "archivo_firmantes_id_api_unique") @db.VarChar(50)
+  archivos               archivos  @relation(fields: [archivo_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "archivo_firmantes_archivo_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model archivos {
+  id                BigInt              @id @default(autoincrement())
+  user_id           BigInt
+  carpeta_id        BigInt
+  nombre            String              @db.VarChar(150)
+  tamanio           String              @db.VarChar(15)
+  file              String              @db.VarChar(50)
+  file_imagen_qr    String?             @db.VarChar(255)
+  file_qr           String?             @db.VarChar(50)
+  file_nombre       String?             @db.VarChar(255)
+  file_ruta         String?             @db.VarChar(255)
+  file_code         String?             @db.VarChar(15)
+  file_token        String?             @db.VarChar(255)
+  file_firmado      String              @default("N") @db.Char(1)
+  file_sello        String              @default("N") @db.Char(1)
+  file_validado     String              @default("N") @db.Char(1)
+  json_validado     String?
+  firmas            Int                 @default(0) @db.SmallInt
+  tipo              String              @default("D") @db.Char(1)
+  activo            String              @default("S") @db.Char(1)
+  created_at        DateTime?           @db.Timestamp(0)
+  updated_at        DateTime?           @db.Timestamp(0)
+  sellos            Int                 @default(0)
+  origin_file       String?             @db.VarChar(255)
+  summary_file      String?             @db.VarChar(255)
+  archivo_firmantes archivo_firmantes[]
+  carpetas          carpetas            @relation(fields: [carpeta_id], references: [id], onUpdate: NoAction, map: "archivos_carpeta_id_foreign")
+  users             users               @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "archivos_user_id_foreign")
+  enlaces           enlaces[]
+  historiales       historiales[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model archivos_empresas {
+  id               BigInt    @id @default(autoincrement())
+  empresa_id       BigInt
+  file_nombre      String    @db.VarChar(255)
+  file_ruta        String    @db.VarChar(255)
+  file_token       String?   @db.VarChar(255)
+  tipo             String    @db.VarChar(50)
+  numero_operacion String?   @db.VarChar(50)
+  firma_validar    String?
+  detalle          String?   @db.VarChar(255)
+  activo           String    @default("S") @db.Char(1)
+  user_id          BigInt
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+  empresas         empresas  @relation(fields: [empresa_id], references: [id], onUpdate: NoAction, map: "archivos_empresas_empresa_id_foreign")
+  users            users     @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "archivos_empresas_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model asignar_pagos {
+  id                                         BigInt          @id @default(autoincrement())
+  cliente_user_id                            BigInt
+  categoria_id                               BigInt
+  catalogo_id                                BigInt
+  precio                                     Float?
+  saldo                                      Float?
+  precio_anterior                            Float?
+  anio                                       String          @db.Char(4)
+  vencimiento_pago                           DateTime?       @db.Date
+  vencimiento_firma                          DateTime?       @db.Date
+  fecha_pago                                 DateTime?       @db.Date
+  fecha_contrato                             DateTime?       @db.Date
+  observacion                                String?         @db.VarChar(255)
+  anulado                                    String          @default("NO") @db.Char(2)
+  forma_pago                                 String?         @db.VarChar(50)
+  banco                                      String?         @db.VarChar(50)
+  banco_operacion                            String?         @db.VarChar(50)
+  banco_observacion                          String?         @db.VarChar(255)
+  archivo                                    String?         @db.VarChar(255)
+  archivo_token                              String?         @db.VarChar(255)
+  validado                                   String?         @db.Char(2)
+  notificado                                 Int             @default(0) @db.SmallInt
+  activo                                     String          @default("S") @db.Char(1)
+  user_id                                    BigInt
+  created_at                                 DateTime?       @db.Timestamp(0)
+  updated_at                                 DateTime?       @db.Timestamp(0)
+  catalogos                                  catalogos       @relation(fields: [catalogo_id], references: [id], onUpdate: NoAction, map: "asignar_pagos_catalogo_id_foreign")
+  categorias                                 categorias      @relation(fields: [categoria_id], references: [id], onUpdate: NoAction, map: "asignar_pagos_categoria_id_foreign")
+  users_asignar_pagos_cliente_user_idTousers users           @relation("asignar_pagos_cliente_user_idTousers", fields: [cliente_user_id], references: [id], onUpdate: NoAction, map: "asignar_pagos_cliente_user_id_foreign")
+  users_asignar_pagos_user_idTousers         users           @relation("asignar_pagos_user_idTousers", fields: [user_id], references: [id], onUpdate: NoAction, map: "asignar_pagos_user_id_foreign")
+  detalle_pagos                              detalle_pagos[]
+  pagos                                      pagos[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model avisos {
+  id           BigInt    @id @default(autoincrement())
+  titulo       String    @db.VarChar(100)
+  mensaje      String?
+  file         String?   @db.VarChar(255)
+  file_nombre  String?   @db.VarChar(255)
+  file_ruta    String?   @db.VarChar(255)
+  file_token   String?   @db.VarChar(255)
+  fecha_inicio DateTime  @db.Date
+  fecha_fin    DateTime  @db.Date
+  tiempo       Int?      @db.SmallInt
+  link         String?   @db.VarChar(255)
+  activo       String    @default("S") @db.Char(1)
+  user_id      BigInt
+  created_at   DateTime? @db.Timestamp(0)
+  updated_at   DateTime? @db.Timestamp(0)
+  users        users     @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "avisos_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model bienes {
+  id          BigInt    @id @default(autoincrement())
+  empresa_id  BigInt
+  socios_id   BigInt
+  tipo        String?   @db.VarChar(40)
+  nombre      String?   @db.VarChar(40)
+  descripcion String?   @db.VarChar(100)
+  marca       String?   @db.VarChar(100)
+  cantidad    Int?
+  precio      Float?
+  total       Float?
+  activo      String    @default("S") @db.Char(1)
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+  empresas    empresas  @relation(fields: [empresa_id], references: [id], onUpdate: NoAction, map: "bienes_empresa_id_foreign")
+  socios      socios    @relation(fields: [socios_id], references: [id], onUpdate: NoAction, map: "bienes_socios_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model bolsas {
+  id                  BigInt            @id @default(autoincrement())
+  tipo_certificado_id BigInt
+  nombre              String            @db.VarChar(50)
+  descripcion         String?           @db.VarChar(255)
+  cantidad            Int               @db.SmallInt
+  precio_unidad       Float
+  total               Float
+  activo              String            @default("S") @db.Char(1)
+  user_id             BigInt
+  created_at          DateTime?         @db.Timestamp(0)
+  updated_at          DateTime?         @db.Timestamp(0)
+  anticipos           anticipos[]
+  tipo_certificados   tipo_certificados @relation(fields: [tipo_certificado_id], references: [id], onUpdate: NoAction, map: "bolsas_tipo_certificado_id_foreign")
+  users               users             @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "bolsas_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model carpetas {
+  id                BigInt              @id @default(autoincrement())
+  user_id           BigInt
+  nombre            String              @db.VarChar(100)
+  descripcion       String?             @db.VarChar(255)
+  token             String?             @db.VarChar(255)
+  token_api         String?             @db.VarChar(255)
+  tipo              String              @default("D") @db.Char(1)
+  activo            String              @default("S") @db.Char(1)
+  created_at        DateTime?           @db.Timestamp(0)
+  updated_at        DateTime?           @db.Timestamp(0)
+  archivos          archivos[]
+  users             users               @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "carpetas_user_id_foreign")
+  compartidos       compartidos[]
+  enlaces           enlaces[]
+  historiales       historiales[]
+  sub_users_carpeta sub_users_carpeta[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model catalogos {
+  id                BigInt          @id @default(autoincrement())
+  categoria_id      BigInt
+  concepto          String          @db.VarChar(50)
+  descripcion       String?         @db.VarChar(100)
+  precio            Float
+  tipo              String?         @db.VarChar(20)
+  cantidad_carpetas Int             @default(0)
+  cantidad_archivos Int             @default(0)
+  cantidad_firmas   Int             @default(0)
+  anio              String?         @db.Char(4)
+  vencimiento_pago  DateTime?       @db.Date
+  vencimiento_firma DateTime?       @db.Date
+  activo            String          @default("S") @db.Char(1)
+  user_id           BigInt
+  created_at        DateTime?       @db.Timestamp(0)
+  updated_at        DateTime?       @db.Timestamp(0)
+  asignar_pagos     asignar_pagos[]
+  categorias        categorias      @relation(fields: [categoria_id], references: [id], onUpdate: NoAction, map: "catalogos_categoria_id_foreign")
+  users             users           @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "catalogos_user_id_foreign")
+  detalle_pagos     detalle_pagos[]
+  pagos             pagos[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model categorias {
+  id                              BigInt                            @id @default(autoincrement())
+  nombre                          String                            @db.VarChar(100)
+  firmas                          Int                               @default(0)
+  periodo                         String                            @default("MENSUAL") @db.VarChar(100)
+  precio_base                     Float                             @default(0)
+  certificado                     String                            @default("N") @db.Char(1)
+  activo                          String                            @default("S") @db.Char(1)
+  created_at                      DateTime?                         @db.Timestamp(0)
+  updated_at                      DateTime?                         @db.Timestamp(0)
+  asignar_pagos                   asignar_pagos[]
+  catalogos                       catalogos[]
+  planes_firmeasy_caracteristicas planes_firmeasy_caracteristicas[]
+  users                           users[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model certificados {
+  id                                         BigInt                          @id @default(autoincrement())
+  tipo_certificado_id                        BigInt
+  contador                                   Int?                            @db.SmallInt
+  anio                                       String?                         @db.VarChar(4)
+  pedido                                     String?                         @db.VarChar(20)
+  numero_documento                           String?                         @db.VarChar(20)
+  denominacion                               String?                         @db.VarChar(255)
+  direccion_fiscal                           String?                         @db.VarChar(255)
+  pais                                       String?                         @db.VarChar(20)
+  ubigeo                                     String?                         @db.VarChar(10)
+  departamento                               String?                         @db.VarChar(50)
+  provincia                                  String?                         @db.VarChar(50)
+  distrito                                   String?                         @db.VarChar(50)
+  representante                              String?                         @default("NO") @db.Char(2)
+  dni_representante                          String?                         @db.VarChar(15)
+  nombre_representante                       String?                         @db.VarChar(150)
+  tipo_documento_id                          BigInt
+  numero_documento_titular                   String                          @db.VarChar(20)
+  denominacion_titular                       String                          @db.VarChar(255)
+  cargo_titular                              String?                         @db.VarChar(50)
+  area_titular                               String?                         @db.VarChar(50)
+  email_envio                                String                          @db.VarChar(50)
+  telefono_codigo                            String                          @db.VarChar(20)
+  telefono_validacion                        String?                         @db.VarChar(20)
+  codigo_sunat                               String?                         @db.VarChar(255)
+  numero_documento_facturacion               String?                         @db.VarChar(20)
+  denominacion_facturacion                   String?                         @db.VarChar(255)
+  direccion_facturacion                      String?                         @db.VarChar(255)
+  ubigeo_facturacion                         String?                         @db.VarChar(8)
+  acepto_contrato                            String                          @default("SI") @db.Char(2)
+  periodo_certificado                        String                          @default("12") @db.VarChar(5)
+  fecha_solicitud                            DateTime                        @db.Timestamp(0)
+  fecha_inicio                               DateTime?                       @db.Date
+  fecha_vencimiento                          DateTime?                       @db.Date
+  fecha_revocado                             DateTime?                       @db.Date
+  archivo_cer                                String?                         @db.VarChar(255)
+  token_cer                                  String?                         @db.VarChar(255)
+  anterior_certificado_id                    BigInt?
+  numero_colegiatura                         String?                         @db.VarChar(10)
+  poder                                      String?                         @db.Char(2)
+  rne                                        String?                         @db.VarChar(10)
+  fecha_llamada                              DateTime?                       @db.Timestamp(0)
+  estado_llamada                             String?                         @db.Char(2)
+  link_video_llamada                         String?                         @db.VarChar(255)
+  operador_user_id                           BigInt
+  observacion                                String?                         @db.VarChar(255)
+  observacion_voucher                        String                          @default("NO") @db.Char(2)
+  codec                                      String?                         @db.VarChar(50)
+  anulado                                    String                          @default("NO") @db.Char(2)
+  token_criptografico                        String                          @default("NO") @db.Char(2)
+  fecha_voucher                              DateTime?                       @db.Timestamp(0)
+  renovado                                   String                          @default("NO") @db.Char(2)
+  verificado                                 String                          @default("NO") @db.Char(2)
+  observacion_operador                       String?
+  costo                                      Float
+  descuento                                  String                          @default("NO") @db.Char(2)
+  monto_descuento                            Float?
+  descuento_autorizado                       String?                         @db.VarChar(255)
+  activo                                     String                          @default("S") @db.Char(1)
+  user_id                                    BigInt
+  created_at                                 DateTime?                       @db.Timestamp(0)
+  updated_at                                 DateTime?                       @db.Timestamp(0)
+  token                                      String?                         @db.VarChar(255)
+  token_api                                  String?                         @db.VarChar(255)
+  cod_horavalidacion                         Int?
+  archivo_certificados                       archivo_certificados[]
+  certificados                               certificados?                   @relation("certificadosTocertificados", fields: [anterior_certificado_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "certificados_anterior_certificado_id_foreign")
+  other_certificados                         certificados[]                  @relation("certificadosTocertificados")
+  users_certificados_operador_user_idTousers users                           @relation("certificados_operador_user_idTousers", fields: [operador_user_id], references: [id], onUpdate: NoAction, map: "certificados_operador_user_id_foreign")
+  tipo_certificados                          tipo_certificados               @relation(fields: [tipo_certificado_id], references: [id], onUpdate: NoAction, map: "certificados_tipo_certificado_id_foreign")
+  tipo_documentos                            tipo_documentos                 @relation(fields: [tipo_documento_id], references: [id], onUpdate: NoAction, map: "certificados_tipo_documento_id_foreign")
+  users_certificados_user_idTousers          users                           @relation("certificados_user_idTousers", fields: [user_id], references: [id], onUpdate: NoAction, map: "certificados_user_id_foreign")
+  detalle_anticipos                          detalle_anticipos[]
+  detalles_validacion_identidad              detalles_validacion_identidad[]
+  enlace_certificado_validacion              enlace_certificado_validacion[]
+  enlaces_cert                               enlaces_cert[]
+  factura_certificados                       factura_certificados[]
+  historial_certificados                     historial_certificados[]
+  historial_socios                           historial_socios[]
+  pago_certificados                          pago_certificados[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model compartidos {
+  id                                       BigInt    @id @default(autoincrement())
+  carpeta_id                               BigInt
+  user_id                                  BigInt
+  destino_user_id                          BigInt
+  destino_email                            String    @db.VarChar(100)
+  tipo                                     String    @default("D") @db.Char(1)
+  activo                                   String    @default("S") @db.Char(1)
+  created_at                               DateTime? @db.Timestamp(0)
+  updated_at                               DateTime? @db.Timestamp(0)
+  carpetas                                 carpetas  @relation(fields: [carpeta_id], references: [id], onUpdate: NoAction, map: "compartidos_carpeta_id_foreign")
+  users_compartidos_destino_user_idTousers users     @relation("compartidos_destino_user_idTousers", fields: [destino_user_id], references: [id], onUpdate: NoAction, map: "compartidos_destino_user_id_foreign")
+  users_compartidos_user_idTousers         users     @relation("compartidos_user_idTousers", fields: [user_id], references: [id], onUpdate: NoAction, map: "compartidos_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model configuraciones {
+  id                  BigInt    @id @default(autoincrement())
+  nombre_sistema      String?   @default("FIRMEASY.TECH") @db.VarChar(100)
+  nombre_whatsapp     String?   @default("FIRMEASY.TECH CERTIFICADOS") @db.VarChar(255)
+  logo_corto          String?   @db.VarChar(255)
+  logo_completo       String?   @db.VarChar(255)
+  ruc                 String?   @default("20600787595") @db.VarChar(20)
+  razon_social        String?   @default("CORPORACION PERUANA GTP EIRL") @db.VarChar(255)
+  telefono            String?   @default("+51943503953") @db.VarChar(100)
+  email               String?   @default("contacto@firmeasy.tech") @db.VarChar(100)
+  direccion           String?   @default("Jr. Tupac Yupanqui 143, Amarilis - Paucarbamba") @db.VarChar(255)
+  cuenta_bcp          String?   @db.VarChar(100)
+  cuenta_interbank    String?   @db.VarChar(100)
+  cuenta_scotiabank   String?   @db.VarChar(100)
+  cuenta_bbva         String?   @db.VarChar(100)
+  cuenta_otros        String?   @db.VarChar(255)
+  maximo_horas        String    @default("2400") @db.VarChar(20)
+  maximo_carpetas     String    @default("1") @db.VarChar(20)
+  maximo_archivos     String    @default("5") @db.VarChar(20)
+  maximo_firmas       String    @default("10") @db.VarChar(20)
+  maximo_sellos       String    @default("10") @db.VarChar(20)
+  maximo_validaciones String    @default("10") @db.VarChar(20)
+  activo              String    @default("S") @db.Char(1)
+  user_id             BigInt
+  created_at          DateTime? @db.Timestamp(0)
+  updated_at          DateTime? @db.Timestamp(0)
+  users               users     @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "configuraciones_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model dato_facturaciones {
+  id                                              BigInt          @id @default(autoincrement())
+  cliente_user_id                                 BigInt
+  tipo_documento_id                               BigInt
+  codigo_sunat                                    String?         @db.VarChar(5)
+  numero_documento                                String?         @db.VarChar(15)
+  razon_social                                    String?         @db.VarChar(255)
+  direccion                                       String?         @db.VarChar(255)
+  ubigeo                                          String?         @db.VarChar(10)
+  departamento                                    String?         @db.VarChar(100)
+  provincia                                       String?         @db.VarChar(100)
+  distrito                                        String?         @db.VarChar(100)
+  activo                                          String          @default("S") @db.Char(1)
+  user_id                                         BigInt
+  created_at                                      DateTime?       @db.Timestamp(0)
+  updated_at                                      DateTime?       @db.Timestamp(0)
+  users_dato_facturaciones_cliente_user_idTousers users           @relation("dato_facturaciones_cliente_user_idTousers", fields: [cliente_user_id], references: [id], onUpdate: NoAction, map: "dato_facturaciones_cliente_user_id_foreign")
+  tipo_documentos                                 tipo_documentos @relation(fields: [tipo_documento_id], references: [id], onUpdate: NoAction, map: "dato_facturaciones_tipo_documento_id_foreign")
+  users_dato_facturaciones_user_idTousers         users           @relation("dato_facturaciones_user_idTousers", fields: [user_id], references: [id], onUpdate: NoAction, map: "dato_facturaciones_user_id_foreign")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model departamentos {
+  id          String  @db.Char(2)
+  descripcion String  @db.VarChar(255)
+  active      Boolean @default(true)
+
+  @@index([id], map: "departamentos_id_index")
+  @@ignore
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model detalle_anticipos {
+  id              BigInt       @id @default(autoincrement())
+  anticipo_id     BigInt
+  certificado_id  BigInt
+  cliente_user_id BigInt
+  activo          String       @default("S") @db.Char(1)
+  created_at      DateTime?    @db.Timestamp(0)
+  updated_at      DateTime?    @db.Timestamp(0)
+  anticipos       anticipos    @relation(fields: [anticipo_id], references: [id], onUpdate: NoAction, map: "detalle_anticipos_anticipo_id_foreign")
+  certificados    certificados @relation(fields: [certificado_id], references: [id], onUpdate: NoAction, map: "detalle_anticipos_certificado_id_foreign")
+  users           users        @relation(fields: [cliente_user_id], references: [id], onUpdate: NoAction, map: "detalle_anticipos_cliente_user_id_foreign")
+}
+
+model detalle_pagos {
+  id                                         BigInt         @id @default(autoincrement())
+  pago_id                                    BigInt
+  cliente_user_id                            BigInt
+  catalogo_id                                BigInt
+  asignar_pago_id                            BigInt?
+  cantidad                                   Int            @default(1) @db.SmallInt
+  monto                                      Float?
+  importe                                    Float?
+  anulado                                    String         @default("NO") @db.Char(2)
+  user_id                                    BigInt
+  created_at                                 DateTime?      @db.Timestamp(0)
+  updated_at                                 DateTime?      @db.Timestamp(0)
+  asignar_pagos                              asignar_pagos? @relation(fields: [asignar_pago_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "detalle_pagos_asignar_pago_id_foreign")
+  catalogos                                  catalogos      @relation(fields: [catalogo_id], references: [id], onUpdate: NoAction, map: "detalle_pagos_catalogo_id_foreign")
+  users_detalle_pagos_cliente_user_idTousers users          @relation("detalle_pagos_cliente_user_idTousers", fields: [cliente_user_id], references: [id], onUpdate: NoAction, map: "detalle_pagos_cliente_user_id_foreign")
+  pagos                                      pagos          @relation(fields: [pago_id], references: [id], onUpdate: NoAction, map: "detalle_pagos_pago_id_foreign")
+  users_detalle_pagos_user_idTousers         users          @relation("detalle_pagos_user_idTousers", fields: [user_id], references: [id], onUpdate: NoAction, map: "detalle_pagos_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model detalles_validacion_identidad {
+  id                       BigInt            @id @default(autoincrement())
+  certificado_id           BigInt
+  tipo_certificado_id      BigInt
+  token_validacion         String?           @db.VarChar(255)
+  token_dni_anverso        String?           @db.VarChar(255)
+  token_dni_reverso        String?           @db.VarChar(255)
+  token_selfie             String?           @db.VarChar(255)
+  numero_documento_titular String?           @db.VarChar(100)
+  nombre_completo          String?           @db.VarChar(100)
+  ubigeo                   String?           @db.VarChar(100)
+  fecha_nacimiento         String?           @db.VarChar(100)
+  fecha_caducidad          String?           @db.VarChar(100)
+  similitud                String?           @db.VarChar(255)
+  tiempo                   String?           @db.VarChar(255)
+  user_id                  BigInt
+  activo                   String            @default("S") @db.Char(1)
+  created_at               DateTime?         @db.Timestamp(0)
+  updated_at               DateTime?         @db.Timestamp(0)
+  certificados             certificados      @relation(fields: [certificado_id], references: [id], onUpdate: NoAction, map: "detalles_validacion_identidad_certificado_id_foreign")
+  tipo_certificados        tipo_certificados @relation(fields: [tipo_certificado_id], references: [id], onUpdate: NoAction, map: "detalles_validacion_identidad_tipo_certificado_id_foreign")
+  users                    users             @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "detalles_validacion_identidad_user_id_foreign")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model distritos {
+  id           String  @db.Char(6)
+  provincia_id String  @db.Char(4)
+  descripcion  String  @db.VarChar(255)
+  active       Boolean @default(true)
+  tipoalcance  String? @db.VarChar(100)
+
+  @@index([id], map: "distritos_id_index")
+  @@ignore
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model empresas {
+  id                           BigInt                @id @default(autoincrement())
+  tipoempresa_id               BigInt?
+  rubro_id                     BigInt?
+  contador                     String?               @db.VarChar(50)
+  pedido                       String?               @db.VarChar(50)
+  anio                         String?               @db.VarChar(50)
+  departamento                 String?               @db.VarChar(50)
+  provincia                    String?               @db.VarChar(50)
+  distrito                     String?               @db.VarChar(50)
+  nombre                       String?               @db.VarChar(80)
+  nombre_1                     String?               @db.VarChar(80)
+  nombre_2                     String?               @db.VarChar(80)
+  direccion                    String?               @db.VarChar(50)
+  tipo_representante           String?               @db.VarChar(250)
+  directorio                   String?               @db.VarChar(250)
+  modalidad                    String?               @db.VarChar(50)
+  objetosocial                 String?
+  codigo_sunat                 String?               @db.VarChar(255)
+  numero_documento_facturacion String?               @db.VarChar(20)
+  denominacion_facturacion     String?               @db.VarChar(255)
+  direccion_facturacion        String?               @db.VarChar(255)
+  ubigeo_facturacion           String?               @db.VarChar(8)
+  costo                        Float?
+  descuento                    String                @default("NO") @db.Char(2)
+  monto_descuento              Float?
+  descuento_autorizado         String?               @db.VarChar(255)
+  token                        String?               @db.VarChar(255)
+  user_id                      BigInt
+  activo                       String                @default("S") @db.Char(1)
+  created_at                   DateTime?             @db.Timestamp(0)
+  updated_at                   DateTime?             @db.Timestamp(0)
+  archivos_empresas            archivos_empresas[]
+  bienes                       bienes[]
+  rubros                       rubros?               @relation(fields: [rubro_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "empresas_rubro_id_foreign")
+  tipo_empresa                 tipo_empresa?         @relation(fields: [tipoempresa_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "empresas_tipoempresa_id_foreign")
+  users                        users                 @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "empresas_user_id_foreign")
+  enlace_constitucion          enlace_constitucion[]
+  enlace_socios                enlace_socios[]
+  historial_empresas           historial_empresas[]
+  historial_socios             historial_socios[]
+  pago_empresas                pago_empresas[]
+  socios                       socios[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model enlace_certificado_validacion {
+  id                  BigInt            @id @default(autoincrement())
+  certificado_id      BigInt
+  tipo_certificado_id BigInt
+  token               String?           @db.VarChar(255)
+  url                 String?           @db.VarChar(255)
+  tiempo              Int               @default(1) @db.SmallInt
+  tiempo_otp          String?           @db.VarChar(30)
+  codigo_otp          String?           @db.VarChar(30)
+  tipo                String?           @db.Char(2)
+  codigo_validador    String?           @db.Char(100)
+  activo              String            @default("S") @db.Char(1)
+  user_id             BigInt
+  created_at          DateTime?         @db.Timestamp(0)
+  updated_at          DateTime?         @db.Timestamp(0)
+  certificados        certificados      @relation(fields: [certificado_id], references: [id], onUpdate: NoAction, map: "enlace_certificado_validacion_certificado_id_foreign")
+  tipo_certificados   tipo_certificados @relation(fields: [tipo_certificado_id], references: [id], onUpdate: NoAction, map: "enlace_certificado_validacion_tipo_certificado_id_foreign")
+  users               users             @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "enlace_certificado_validacion_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model enlace_constitucion {
+  id         BigInt    @id @default(autoincrement())
+  empresa_id BigInt
+  token      String?   @db.VarChar(255)
+  url        String?   @db.VarChar(255)
+  tiempo     Int       @default(1) @db.SmallInt
+  tipo       String?   @db.Char(2)
+  activo     String    @default("S") @db.Char(1)
+  user_id    BigInt
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  empresas   empresas  @relation(fields: [empresa_id], references: [id], onUpdate: NoAction, map: "enlace_constitucion_empresa_id_foreign")
+  users      users     @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "enlace_constitucion_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model enlace_socios {
+  id         BigInt    @id @default(autoincrement())
+  empresa_id BigInt
+  socios_id  BigInt
+  token      String?   @db.VarChar(255)
+  url        String?   @db.VarChar(255)
+  tiempo     Int       @default(1) @db.SmallInt
+  tipo       String?   @db.Char(2)
+  activo     String    @default("S") @db.Char(1)
+  user_id    BigInt
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  empresas   empresas  @relation(fields: [empresa_id], references: [id], onUpdate: NoAction, map: "enlace_socios_empresa_id_foreign")
+  socios     socios    @relation(fields: [socios_id], references: [id], onUpdate: NoAction, map: "enlace_socios_socios_id_foreign")
+  users      users     @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "enlace_socios_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model enlaces {
+  id                BigInt    @id @default(autoincrement())
+  user_id           BigInt
+  carpeta_id        BigInt?
+  archivo_id        BigInt?
+  token             String    @db.VarChar(255)
+  url               String    @db.VarChar(255)
+  tiempo            Int       @default(1) @db.SmallInt
+  firma_electronica String?   @db.VarChar(255)
+  tipo              String    @default("D") @db.Char(1)
+  activo            String    @default("S") @db.Char(1)
+  created_at        DateTime? @db.Timestamp(0)
+  updated_at        DateTime? @db.Timestamp(0)
+  archivos          archivos? @relation(fields: [archivo_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "enlaces_archivo_id_foreign")
+  carpetas          carpetas? @relation(fields: [carpeta_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "enlaces_carpeta_id_foreign")
+  users             users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "enlaces_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model enlaces_cert {
+  id             BigInt       @id @default(autoincrement())
+  certificado_id BigInt
+  token          String?      @db.VarChar(255)
+  url            String?      @db.VarChar(255)
+  activo         String       @default("S") @db.Char(1)
+  created_at     DateTime?    @db.Timestamp(0)
+  updated_at     DateTime?    @db.Timestamp(0)
+  certificados   certificados @relation(fields: [certificado_id], references: [id], onUpdate: NoAction, map: "enlaces_cert_certificado_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model factura_certificados {
+  id                  BigInt       @id @default(autoincrement())
+  certificado_id      BigInt
+  serie_id            BigInt
+  fecha_emision       DateTime     @db.Date
+  subtotal            Float?
+  igv                 Float?
+  total               Float?
+  external_id         String?      @db.VarChar(255)
+  file_name           String?      @db.VarChar(100)
+  hash                String?      @db.VarChar(100)
+  number              String?      @db.VarChar(10)
+  number_to_letter    String?      @db.VarChar(255)
+  file_cdr            String?
+  file_xml            String?
+  file_pdf            String?
+  image_qr            String?
+  serial_number       String?      @db.VarChar(100)
+  serial              String?      @db.VarChar(50)
+  state_sunat         String?      @db.VarChar(50)
+  message_sunat       String?      @db.VarChar(150)
+  observacion         String?      @db.VarChar(255)
+  anulado             String       @default("NO") @db.Char(2)
+  ticket_anulado      String?      @db.VarChar(50)
+  external_id_anulado String?      @db.VarChar(50)
+  codigo_anulado      String?      @db.VarChar(50)
+  mensaje_anulado     String?      @db.VarChar(255)
+  xml_anulado         String?
+  cdr_anulado         String?
+  activo              String       @default("S") @db.Char(1)
+  user_id             BigInt
+  created_at          DateTime?    @db.Timestamp(0)
+  updated_at          DateTime?    @db.Timestamp(0)
+  certificados        certificados @relation(fields: [certificado_id], references: [id], onUpdate: NoAction, map: "factura_certificados_certificado_id_foreign")
+  series              series       @relation(fields: [serie_id], references: [id], onUpdate: NoAction, map: "factura_certificados_serie_id_foreign")
+  users               users        @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "factura_certificados_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model historial_certificados {
+  id             BigInt       @id @default(autoincrement())
+  certificado_id BigInt
+  estado         String       @db.VarChar(50)
+  codigo         String?      @db.Char(1)
+  comentario     String       @db.VarChar(100)
+  activo         String       @default("S") @db.Char(1)
+  user_id        BigInt
+  created_at     DateTime?    @db.Timestamp(0)
+  updated_at     DateTime?    @db.Timestamp(0)
+  certificados   certificados @relation(fields: [certificado_id], references: [id], onUpdate: NoAction, map: "historial_certificados_certificado_id_foreign")
+  users          users        @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "historial_certificados_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model historial_empresas {
+  id         BigInt    @id @default(autoincrement())
+  empresa_id BigInt
+  estado     String?   @db.VarChar(50)
+  codigo     String?   @db.Char(1)
+  activo     String    @default("S") @db.Char(1)
+  user_id    BigInt
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  empresas   empresas  @relation(fields: [empresa_id], references: [id], onUpdate: NoAction, map: "historial_empresas_empresa_id_foreign")
+  users      users     @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "historial_empresas_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model historial_socios {
+  id             BigInt        @id @default(autoincrement())
+  empresa_id     BigInt
+  certificado_id BigInt?
+  socios_id      BigInt
+  estado         String?       @db.VarChar(50)
+  codigo         String?       @db.Char(1)
+  activo         String        @default("S") @db.Char(1)
+  user_id        BigInt
+  created_at     DateTime?     @db.Timestamp(0)
+  updated_at     DateTime?     @db.Timestamp(0)
+  certificados   certificados? @relation(fields: [certificado_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "historial_socios_certificado_id_foreign")
+  empresas       empresas      @relation(fields: [empresa_id], references: [id], onUpdate: NoAction, map: "historial_socios_empresa_id_foreign")
+  socios         socios        @relation(fields: [socios_id], references: [id], onUpdate: NoAction, map: "historial_socios_socios_id_foreign")
+  users          users         @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "historial_socios_user_id_foreign")
+}
+
+model historiales {
+  id         BigInt    @id @default(autoincrement())
+  accion     String    @db.VarChar(50)
+  carpeta_id BigInt?
+  archivo_id BigInt?
+  user_id    BigInt
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  archivos   archivos? @relation(fields: [archivo_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "historiales_archivo_id_foreign")
+  carpetas   carpetas? @relation(fields: [carpeta_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "historiales_carpeta_id_foreign")
+  users      users     @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "historiales_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model horavalidacion {
+  id            BigInt    @id @default(autoincrement())
+  hora          DateTime? @db.Time(0)
+  cod_operador  BigInt
+  estado        String?   @db.VarChar(255)
+  cod_dia       Int?
+  fecha_llamada DateTime? @db.Timestamp(0)
+  activo        String    @default("S") @db.Char(1)
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+  users         users     @relation(fields: [cod_operador], references: [id], onUpdate: NoAction, map: "horavalidacion_cod_operador_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mensajes {
+  id             BigInt           @id @default(autoincrement())
+  titulo         String           @db.VarChar(100)
+  mensaje        String
+  file           String?          @db.VarChar(255)
+  file_token     String?          @db.VarChar(255)
+  file_link      String?          @db.VarChar(255)
+  activo         String           @default("S") @db.Char(1)
+  user_id        BigInt
+  created_at     DateTime?        @db.Timestamp(0)
+  updated_at     DateTime?        @db.Timestamp(0)
+  users          users            @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "mensajes_user_id_foreign")
+  notificaciones notificaciones[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model menus {
+  id           BigInt         @id @default(autoincrement())
+  nombre       String         @db.VarChar(50)
+  favicon      String         @db.VarChar(50)
+  route        String         @db.VarChar(100)
+  url          String         @db.VarChar(100)
+  orden        Int            @db.SmallInt
+  submenus     String         @default("N") @db.Char(1)
+  tipo         String         @default("E") @db.Char(1)
+  activo       String         @default("S") @db.Char(1)
+  user_id      BigInt
+  created_at   DateTime?      @db.Timestamp(0)
+  updated_at   DateTime?      @db.Timestamp(0)
+  users        users          @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "menus_user_id_foreign")
+  rol_submenus rol_submenus[]
+  menu_submenus submenus[]
+}
+
+model migrations {
+  id        Int    @id @default(autoincrement())
+  migration String @db.VarChar(255)
+  batch     Int
+}
+
+model notificaciones {
+  id                   BigInt    @id @default(autoincrement())
+  user_id              BigInt
+  tipo_cliente         String?   @db.VarChar(100)
+  recibir_notificacion String    @default("SI") @db.Char(2)
+  cantidad             Int       @default(1) @db.SmallInt
+  mensaje_id           BigInt?
+  created_at           DateTime? @db.Timestamp(0)
+  updated_at           DateTime? @db.Timestamp(0)
+  mensajes             mensajes? @relation(fields: [mensaje_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "notificaciones_mensaje_id_foreign")
+  users                users     @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "notificaciones_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model pago_certificados {
+  id               BigInt       @id @default(autoincrement())
+  certificado_id   BigInt
+  medio_pago       String       @db.VarChar(50)
+  numero_operacion String       @db.VarChar(20)
+  descripcion      String?      @db.VarChar(100)
+  monto            Float
+  fecha_pago       DateTime?    @db.Date
+  observacion      String?      @db.VarChar(255)
+  activo           String       @default("S") @db.Char(1)
+  user_id          BigInt
+  created_at       DateTime?    @db.Timestamp(0)
+  updated_at       DateTime?    @db.Timestamp(0)
+  certificados     certificados @relation(fields: [certificado_id], references: [id], onUpdate: NoAction, map: "pago_certificados_certificado_id_foreign")
+  users            users        @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "pago_certificados_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model pago_empresas {
+  id               BigInt    @id @default(autoincrement())
+  empresa_id       BigInt
+  medio_pago       String    @db.VarChar(50)
+  numero_operacion String    @db.VarChar(20)
+  descripcion      String?   @db.VarChar(100)
+  monto            Float
+  fecha_pago       DateTime? @db.Date
+  observacion      String?   @db.VarChar(255)
+  activo           String    @default("S") @db.Char(1)
+  user_id          BigInt
+  created_at       DateTime? @db.Timestamp(0)
+  updated_at       DateTime? @db.Timestamp(0)
+  empresas         empresas  @relation(fields: [empresa_id], references: [id], onUpdate: NoAction, map: "pago_empresas_empresa_id_foreign")
+  users            users     @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "pago_empresas_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model pagos {
+  id                                 BigInt          @id @default(autoincrement())
+  cliente_user_id                    BigInt
+  catalogo_id                        BigInt?
+  asignar_pago_id                    BigInt?
+  serie_id                           BigInt
+  fecha_emision                      DateTime?       @db.Date
+  subtotal                           Float?
+  igv                                Float?
+  total                              Float?
+  forma_pago                         String?         @db.VarChar(50)
+  numero_operacion                   String?         @db.VarChar(50)
+  tipo_documento_sunat               String?         @db.VarChar(10)
+  numero_documento                   String?         @db.VarChar(15)
+  razon_social                       String?         @db.VarChar(255)
+  external_id                        String?         @db.VarChar(255)
+  file_name                          String?         @db.VarChar(100)
+  hash                               String?         @db.VarChar(100)
+  number                             String?         @db.VarChar(10)
+  number_to_letter                   String?         @db.VarChar(255)
+  file_cdr                           String?
+  file_xml                           String?
+  file_pdf                           String?
+  image_qr                           String?
+  serial_number                      String?         @db.VarChar(100)
+  serial                             String?         @db.VarChar(50)
+  state_sunat                        String?         @db.VarChar(50)
+  message_sunat                      String?         @db.VarChar(150)
+  observacion                        String?         @db.VarChar(255)
+  anulado                            String          @default("NO") @db.Char(2)
+  ticket_anulado                     String?         @db.VarChar(50)
+  external_id_anulado                String?         @db.VarChar(50)
+  codigo_anulado                     String?         @db.VarChar(50)
+  mensaje_anulado                    String?         @db.VarChar(255)
+  xml_anulado                        String?
+  cdr_anulado                        String?
+  activo                             String          @default("S") @db.Char(1)
+  user_id                            BigInt
+  created_at                         DateTime?       @db.Timestamp(0)
+  updated_at                         DateTime?       @db.Timestamp(0)
+  detalle_pagos                      detalle_pagos[]
+  asignar_pagos                      asignar_pagos?  @relation(fields: [asignar_pago_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "pagos_asignar_pago_id_foreign")
+  catalogos                          catalogos?      @relation(fields: [catalogo_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "pagos_catalogo_id_foreign")
+  users_pagos_cliente_user_idTousers users           @relation("pagos_cliente_user_idTousers", fields: [cliente_user_id], references: [id], onUpdate: NoAction, map: "pagos_cliente_user_id_foreign")
+  series                             series          @relation(fields: [serie_id], references: [id], onUpdate: NoAction, map: "pagos_serie_id_foreign")
+  users_pagos_user_idTousers         users           @relation("pagos_user_idTousers", fields: [user_id], references: [id], onUpdate: NoAction, map: "pagos_user_id_foreign")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model password_resets {
+  email      String    @db.VarChar(255)
+  token      String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+
+  @@index([email], map: "password_resets_email_index")
+  @@ignore
+}
+
+model personal_access_tokens {
+  id             BigInt    @id @default(autoincrement())
+  tokenable_type String    @db.VarChar(255)
+  tokenable_id   BigInt
+  name           String    @db.VarChar(255)
+  token          String    @unique(map: "personal_access_tokens_token_unique") @db.VarChar(64)
+  abilities      String?
+  last_used_at   DateTime? @db.Timestamp(0)
+  created_at     DateTime? @db.Timestamp(0)
+  updated_at     DateTime? @db.Timestamp(0)
+
+  @@index([tokenable_type, tokenable_id], map: "personal_access_tokens_tokenable_type_tokenable_id_index")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model plan_certificados {
+  id                  BigInt            @id @default(autoincrement())
+  tipo_certificado_id BigInt
+  tipouser            BigInt
+  nombre              String            @db.VarChar(100)
+  precio_base         Float
+  precio_venta        Float
+  periodo             Int               @db.SmallInt
+  comentario          String?           @db.VarChar(100)
+  activo              String            @default("S") @db.Char(1)
+  user_id             BigInt
+  created_at          DateTime?         @db.Timestamp(0)
+  updated_at          DateTime?         @db.Timestamp(0)
+  tipo_certificados   tipo_certificados @relation(fields: [tipo_certificado_id], references: [id], onUpdate: NoAction, map: "plan_certificados_tipo_certificado_id_foreign")
+  tipousers           tipousers         @relation(fields: [tipouser], references: [id], onUpdate: NoAction, map: "plan_certificados_tipouser_foreign")
+  users               users             @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "plan_certificados_user_id_foreign")
+}
+
+model planes_firmeasy_caracteristicas {
+  id           BigInt     @id @default(autoincrement())
+  categoria_id BigInt
+  nombre       String     @db.VarChar(255)
+  descripcion  String?
+  created_at   DateTime?  @db.Timestamp(0)
+  updated_at   DateTime?  @db.Timestamp(0)
+  categorias   categorias @relation(fields: [categoria_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "planes_firmeasy_caracteristicas_categoria_id_foreign")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model provincias {
+  id              String  @db.Char(4)
+  departamento_id String  @db.Char(2)
+  descripcion     String  @db.VarChar(255)
+  active          Boolean @default(true)
+
+  @@index([id], map: "provincias_id_index")
+  @@ignore
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model recargas {
+  id                                    BigInt    @id @default(autoincrement())
+  cliente_user_id                       BigInt
+  serie_id                              BigInt
+  fecha_emision                         DateTime? @db.Date
+  subtotal                              Float?
+  igv                                   Float?
+  total                                 Float?
+  forma_pago                            String?   @db.VarChar(50)
+  numero_operacion                      String?   @db.VarChar(50)
+  tipo_documento_sunat                  String?   @db.VarChar(10)
+  numero_documento                      String?   @db.VarChar(15)
+  razon_social                          String?   @db.VarChar(255)
+  external_id                           String?   @db.VarChar(255)
+  file_name                             String?   @db.VarChar(100)
+  hash                                  String?   @db.VarChar(100)
+  number                                String?   @db.VarChar(10)
+  number_to_letter                      String?   @db.VarChar(255)
+  file_cdr                              String?
+  file_xml                              String?
+  file_pdf                              String?
+  image_qr                              String?
+  serial_number                         String?   @db.VarChar(100)
+  serial                                String?   @db.VarChar(50)
+  state_sunat                           String?   @db.VarChar(50)
+  message_sunat                         String?   @db.VarChar(150)
+  observacion                           String?   @db.VarChar(255)
+  anulado                               String    @default("NO") @db.Char(2)
+  ticket_anulado                        String?   @db.VarChar(50)
+  external_id_anulado                   String?   @db.VarChar(50)
+  codigo_anulado                        String?   @db.VarChar(50)
+  mensaje_anulado                       String?   @db.VarChar(255)
+  xml_anulado                           String?
+  cdr_anulado                           String?
+  activo                                String    @default("S") @db.Char(1)
+  user_id                               BigInt
+  created_at                            DateTime? @db.Timestamp(0)
+  updated_at                            DateTime? @db.Timestamp(0)
+  users_recargas_cliente_user_idTousers users     @relation("recargas_cliente_user_idTousers", fields: [cliente_user_id], references: [id], onUpdate: NoAction, map: "recargas_cliente_user_id_foreign")
+  series                                series    @relation(fields: [serie_id], references: [id], onUpdate: NoAction, map: "recargas_serie_id_foreign")
+  users_recargas_user_idTousers         users     @relation("recargas_user_idTousers", fields: [user_id], references: [id], onUpdate: NoAction, map: "recargas_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model rol_submenus {
+  id         BigInt    @id @default(autoincrement())
+  rol_id     BigInt
+  menu_id    BigInt
+  submenu_id BigInt
+  crear      String    @default("N") @db.Char(1)
+  editar     String    @default("N") @db.Char(1)
+  eliminar   String    @default("N") @db.Char(1)
+  otros      String    @default("N") @db.Char(1)
+  activo     String    @default("N") @db.Char(1)
+  user_id    BigInt
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  menus      menus     @relation(fields: [menu_id], references: [id], onUpdate: NoAction, map: "rol_submenus_menu_id_foreign")
+  roles      roles     @relation(fields: [rol_id], references: [id], onUpdate: NoAction, map: "rol_submenus_rol_id_foreign")
+  submenus   submenus  @relation(fields: [submenu_id], references: [id], onUpdate: NoAction, map: "rol_submenus_submenu_id_foreign")
+  users      users     @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "rol_submenus_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model roles {
+  id           BigInt         @id @default(autoincrement())
+  nombre       String         @db.VarChar(50)
+  tipo         String         @default("E") @db.Char(1)
+  activo       String         @default("S") @db.Char(1)
+  created_at   DateTime?      @db.Timestamp(0)
+  updated_at   DateTime?      @db.Timestamp(0)
+  rol_submenus rol_submenus[]
+  users        users[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model rubros {
+  id         BigInt     @id @default(autoincrement())
+  nombre     String?    @db.VarChar(50)
+  esquema    String?    @db.VarChar(1000)
+  activo     String     @default("S") @db.Char(1)
+  created_at DateTime?  @db.Timestamp(0)
+  updated_at DateTime?  @db.Timestamp(0)
+  empresas   empresas[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model series {
+  id                   BigInt                 @id @default(autoincrement())
+  description          String                 @db.VarChar(50)
+  typedocument_id      String                 @db.Char(2)
+  affected_igv         String                 @db.Char(2)
+  affected_description String?                @db.VarChar(255)
+  activo               String                 @default("S") @db.Char(1)
+  user_id              BigInt
+  created_at           DateTime?              @db.Timestamp(0)
+  updated_at           DateTime?              @db.Timestamp(0)
+  anticipos            anticipos[]
+  factura_certificados factura_certificados[]
+  pagos                pagos[]
+  recargas             recargas[]
+  users                users                  @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "series_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model socios {
+  id                       BigInt             @id @default(autoincrement())
+  empresa_id               BigInt
+  tipo_documento_id        BigInt
+  numero_documento_titular String?            @db.VarChar(12)
+  nombre_completo          String?            @db.VarChar(60)
+  direccion                String?            @db.VarChar(100)
+  cargo                    String?            @db.VarChar(40)
+  telefono                 String?            @db.VarChar(10)
+  correo                   String?            @db.VarChar(50)
+  pais                     String?            @db.VarChar(50)
+  ubigeo                   String?            @db.VarChar(50)
+  departamento             String?            @db.VarChar(50)
+  provincia                String?            @db.VarChar(50)
+  distrito                 String?            @db.VarChar(50)
+  nacionalidad             String?            @db.VarChar(320)
+  estado_civil             String?            @db.VarChar(40)
+  profesion                String?            @db.VarChar(60)
+  fecha_nacimiento         DateTime?          @db.Date
+  socio_id                 BigInt?
+  activo                   String             @default("S") @db.Char(1)
+  created_at               DateTime?          @db.Timestamp(0)
+  updated_at               DateTime?          @db.Timestamp(0)
+  bienes                   bienes[]
+  enlace_socios            enlace_socios[]
+  historial_socios         historial_socios[]
+  empresas                 empresas           @relation(fields: [empresa_id], references: [id], onUpdate: NoAction, map: "socios_empresa_id_foreign")
+  socios                   socios?            @relation("sociosTosocios", fields: [socio_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "socios_socio_id_foreign")
+  other_socios             socios[]           @relation("sociosTosocios")
+  tipo_documentos          tipo_documentos    @relation(fields: [tipo_documento_id], references: [id], onUpdate: NoAction, map: "socios_tipo_documento_id_foreign")
+}
+
+model sub_users_carpeta {
+  id                                            BigInt    @id @default(autoincrement())
+  parent_user_id                                BigInt?
+  sub_user_id                                   BigInt?
+  carpeta_id                                    BigInt?
+  carpetas                                      carpetas? @relation(fields: [carpeta_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "sub_users_carpeta_carpeta_id_foreign")
+  users_sub_users_carpeta_parent_user_idTousers users?    @relation("sub_users_carpeta_parent_user_idTousers", fields: [parent_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "sub_users_carpeta_parent_user_id_foreign")
+  users_sub_users_carpeta_sub_user_idTousers    users?    @relation("sub_users_carpeta_sub_user_idTousers", fields: [sub_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "sub_users_carpeta_sub_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model submenus {
+  id           BigInt         @id @default(autoincrement())
+  menu_id      BigInt
+  nombre       String         @db.VarChar(50)
+  route        String         @db.VarChar(100)
+  url          String         @db.VarChar(100)
+  orden        Int            @db.SmallInt
+  opciones     String         @default("N") @db.Char(1)
+  tipo         String         @default("E") @db.Char(1)
+  activo       String         @default("S") @db.Char(1)
+  user_id      BigInt
+  created_at   DateTime?      @db.Timestamp(0)
+  updated_at   DateTime?      @db.Timestamp(0)
+  rol_submenus rol_submenus[]
+  menus        menus          @relation(fields: [menu_id], references: [id], onUpdate: NoAction, map: "submenus_menu_id_foreign")
+  users        users          @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "submenus_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model tipo_certificados {
+  id                            BigInt                          @id @default(autoincrement())
+  nombre                        String                          @db.VarChar(100)
+  descripcion                   String                          @db.VarChar(100)
+  activo                        String                          @default("S") @db.Char(1)
+  user_id                       BigInt
+  created_at                    DateTime?                       @db.Timestamp(0)
+  updated_at                    DateTime?                       @db.Timestamp(0)
+  bolsas                        bolsas[]
+  certificados                  certificados[]
+  detalles_validacion_identidad detalles_validacion_identidad[]
+  enlace_certificado_validacion enlace_certificado_validacion[]
+  plan_certificados             plan_certificados[]
+  users                         users                           @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "tipo_certificados_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model tipo_documentos {
+  id                 BigInt               @id @default(autoincrement())
+  nombre             String               @db.VarChar(100)
+  codigo_sunat       String               @db.Char(2)
+  activo             String               @default("S") @db.Char(1)
+  created_at         DateTime?            @db.Timestamp(0)
+  updated_at         DateTime?            @db.Timestamp(0)
+  certificados       certificados[]
+  dato_facturaciones dato_facturaciones[]
+  socios             socios[]
+  users              users[]
+  ventas             ventas[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model tipo_empresa {
+  id          BigInt     @id @default(autoincrement())
+  nombre      String     @db.VarChar(200)
+  descripcion String     @db.VarChar(300)
+  min_socio   Int
+  max_socio   Int
+  user_id     BigInt
+  activo      String     @default("S") @db.Char(1)
+  created_at  DateTime?  @db.Timestamp(0)
+  updated_at  DateTime?  @db.Timestamp(0)
+  empresas    empresas[]
+  users       users      @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "tipo_empresa_user_id_foreign")
+}
+
+model tipousers {
+  id                BigInt              @id @default(autoincrement())
+  descripcion       String              @db.VarChar(100)
+  created_at        DateTime?           @db.Timestamp(0)
+  updated_at        DateTime?           @db.Timestamp(0)
+  plan_certificados plan_certificados[]
+  users             users[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model users {
+  id                                                           BigInt                          @id @default(autoincrement())
+  plan_id                                                      BigInt
+  rol_id                                                       BigInt
+  tipo_documento_id                                            BigInt
+  tipouser_id                                                  BigInt?
+  firmas_disponibles                                           Int                             @default(0)
+  numero_documento                                             String                          @db.VarChar(15)
+  nombres                                                      String                          @db.VarChar(255)
+  codigo_celular                                               String                          @default("+51") @db.VarChar(5)
+  celular                                                      String                          @db.VarChar(15)
+  email                                                        String                          @unique(map: "users_email_unique") @db.VarChar(50)
+  clave_secreta                                                String                          @db.Char(6)
+  codigo_afiliacion                                            String?                         @db.Char(8)
+  password                                                     String?                         @db.VarChar(255)
+  firma                                                        String?                         @db.VarChar(255)
+  firma_auth                                                   String?                         @db.VarChar(255)
+  token                                                        String?                         @db.VarChar(255)
+  token_api                                                    String?                         @db.VarChar(255)
+  token_soporte                                                String?                         @db.VarChar(255)
+  remember_token                                               String?                         @db.VarChar(100)
+  supervisor_user_id                                           BigInt?
+  tipo                                                         String                          @default("E") @db.Char(1)
+  operador_registro                                            String                          @default("NO") @db.Char(2)
+  config_qr                                                    String                          @default("S") @db.Char(1)
+  config_logo                                                  String                          @default("N") @db.Char(1)
+  sign_logo                                                    String?                         @db.VarChar(255)
+  google2fa_secret                                             String?
+  code_otp                                                     String?                         @db.VarChar(255)
+  activo                                                       String                          @default("S") @db.Char(1)
+  created_at                                                   DateTime?                       @db.Timestamp(0)
+  updated_at                                                   DateTime?                       @db.Timestamp(0)
+  avatar                                                       String?                         @db.VarChar(255)
+  external_id                                                  String?                         @db.VarChar(255)
+  external_auth                                                String?                         @db.VarChar(255)
+  two_factor_auth                                              Boolean                         @default(false)
+  sellos                                                       Int                             @default(0)
+  identifier                                                   String?                         @db.VarChar(255)
+  parent_user_id                                               BigInt?
+  anticipos_anticipos_cliente_user_idTousers                   anticipos[]                     @relation("anticipos_cliente_user_idTousers")
+  anticipos_anticipos_user_idTousers                           anticipos[]                     @relation("anticipos_user_idTousers")
+  apis                                                         apis[]
+  archivo_certificados                                         archivo_certificados[]
+  archivos                                                     archivos[]
+  archivos_empresas                                            archivos_empresas[]
+  asignar_pagos_asignar_pagos_cliente_user_idTousers           asignar_pagos[]                 @relation("asignar_pagos_cliente_user_idTousers")
+  asignar_pagos_asignar_pagos_user_idTousers                   asignar_pagos[]                 @relation("asignar_pagos_user_idTousers")
+  avisos                                                       avisos[]
+  bolsas                                                       bolsas[]
+  carpetas                                                     carpetas[]
+  catalogos                                                    catalogos[]
+  certificados_certificados_operador_user_idTousers            certificados[]                  @relation("certificados_operador_user_idTousers")
+  certificados_certificados_user_idTousers                     certificados[]                  @relation("certificados_user_idTousers")
+  compartidos_compartidos_destino_user_idTousers               compartidos[]                   @relation("compartidos_destino_user_idTousers")
+  compartidos_compartidos_user_idTousers                       compartidos[]                   @relation("compartidos_user_idTousers")
+  configuraciones                                              configuraciones[]
+  dato_facturaciones_dato_facturaciones_cliente_user_idTousers dato_facturaciones[]            @relation("dato_facturaciones_cliente_user_idTousers")
+  dato_facturaciones_dato_facturaciones_user_idTousers         dato_facturaciones[]            @relation("dato_facturaciones_user_idTousers")
+  detalle_anticipos                                            detalle_anticipos[]
+  detalle_pagos_detalle_pagos_cliente_user_idTousers           detalle_pagos[]                 @relation("detalle_pagos_cliente_user_idTousers")
+  detalle_pagos_detalle_pagos_user_idTousers                   detalle_pagos[]                 @relation("detalle_pagos_user_idTousers")
+  detalles_validacion_identidad                                detalles_validacion_identidad[]
+  empresas                                                     empresas[]
+  enlace_certificado_validacion                                enlace_certificado_validacion[]
+  enlace_constitucion                                          enlace_constitucion[]
+  enlace_socios                                                enlace_socios[]
+  enlaces                                                      enlaces[]
+  factura_certificados                                         factura_certificados[]
+  historial_certificados                                       historial_certificados[]
+  historial_empresas                                           historial_empresas[]
+  historial_socios                                             historial_socios[]
+  historiales                                                  historiales[]
+  horavalidacion                                               horavalidacion[]
+  mensajes                                                     mensajes[]
+  menus                                                        menus[]
+  notificaciones                                               notificaciones[]
+  pago_certificados                                            pago_certificados[]
+  pago_empresas                                                pago_empresas[]
+  pagos_pagos_cliente_user_idTousers                           pagos[]                         @relation("pagos_cliente_user_idTousers")
+  pagos_pagos_user_idTousers                                   pagos[]                         @relation("pagos_user_idTousers")
+  plan_certificados                                            plan_certificados[]
+  recargas_recargas_cliente_user_idTousers                     recargas[]                      @relation("recargas_cliente_user_idTousers")
+  recargas_recargas_user_idTousers                             recargas[]                      @relation("recargas_user_idTousers")
+  rol_submenus                                                 rol_submenus[]
+  series                                                       series[]
+  sub_users_carpeta_sub_users_carpeta_parent_user_idTousers    sub_users_carpeta[]             @relation("sub_users_carpeta_parent_user_idTousers")
+  sub_users_carpeta_sub_users_carpeta_sub_user_idTousers       sub_users_carpeta[]             @relation("sub_users_carpeta_sub_user_idTousers")
+  submenus                                                     submenus[]
+  tipo_certificados                                            tipo_certificados[]
+  tipo_empresa                                                 tipo_empresa[]
+  users_users_parent_user_idTousers                            users?                          @relation("users_parent_user_idTousers", fields: [parent_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "users_parent_user_id_foreign")
+  other_users_users_parent_user_idTousers                      users[]                         @relation("users_parent_user_idTousers")
+  categorias                                                   categorias                      @relation(fields: [plan_id], references: [id], onUpdate: NoAction, map: "users_plan_id_foreign")
+  roles                                                        roles                           @relation(fields: [rol_id], references: [id], onUpdate: NoAction, map: "users_rol_id_foreign")
+  users_users_supervisor_user_idTousers                        users?                          @relation("users_supervisor_user_idTousers", fields: [supervisor_user_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "users_supervisor_user_id_foreign")
+  other_users_users_supervisor_user_idTousers                  users[]                         @relation("users_supervisor_user_idTousers")
+  tipo_documentos                                              tipo_documentos                 @relation(fields: [tipo_documento_id], references: [id], onUpdate: NoAction, map: "users_tipo_documento_id_foreign")
+  tipousers                                                    tipousers?                      @relation(fields: [tipouser_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "users_tipouser_id_foreign")
+  validacion                                                   validacion[]
+  ventas                                                       ventas[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model validacion {
+  id         BigInt    @id @default(autoincrement())
+  dni        String?
+  activo     String    @default("S") @db.Char(1)
+  user_id    BigInt
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  users      users     @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "validacion_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model ventas {
+  id                    BigInt          @id @default(autoincrement())
+  tipo_documento_id     BigInt
+  numero_documento      String          @db.VarChar(15)
+  nombres               String          @db.VarChar(255)
+  email                 String          @db.VarChar(255)
+  celular               String          @db.VarChar(255)
+  informacion_adicional String?
+  activo                String          @default("S") @db.Char(1)
+  user_id               BigInt?
+  created_at            DateTime?       @db.Timestamp(0)
+  updated_at            DateTime?       @db.Timestamp(0)
+  tipo_documentos       tipo_documentos @relation(fields: [tipo_documento_id], references: [id], onUpdate: NoAction, map: "ventas_tipo_documento_id_foreign")
+  users                 users?          @relation(fields: [user_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "ventas_user_id_foreign")
+}
