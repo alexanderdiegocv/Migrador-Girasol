@@ -1,47 +1,114 @@
-import { Controller, Get,Response } from '@nestjs/common';
+import { Controller, Get,HttpCode,HttpException,HttpStatus,Response } from '@nestjs/common';
 import { MainService } from './main.service';
-import { v4 as uuidv4 } from 'uuid';
-import { json } from 'stream/consumers';
 
 @Controller()
 export class MainController {
   constructor(private readonly mainService: MainService) {}
 
   @Get('users')
-  async getAllUsersGirasol() {
+  @HttpCode(200)
+  async updateUsers() {
 
     try {
 
-      const users = await this.mainService.getAllUsersGirasol();
-
-      const sanitizedUsers = users.map(user => ({
-        id: Number(user.id),
-        plan_id: 1,
-        rol_id: (user.tipouser_id === 1) ? 1 : (user.tipouser_id === 10) ? 3 : 2,
-        tipo_documento_id: Number(user.tipodocumento_id),
-        tipouser_id: (user.tipouser_id === 10) ? 7 : user.tipouser_id,
-        numero_documento: user.document_number,
-        nombres: user.name,
-        celular: user.phone,
-        email: user.email,
-        clave_secreta: '123456',
-        codigo_afiliacion: user.codigo_afiliacion,
-        password: user.password,
-        token: uuidv4(),
-        tipo: (user.tipouser_id === 1 || user.tipouser_id === 10) ? 'I' : 'E',
-        operador_registro: (user.tipouser_id === 10) ? 'SI' : 'NO',
-        activo: (user.activo === 'SI') ? 'S' : 'N',
-        created_at: user.created_at,
-        updated_at: user.updated_at,
-      }));
+      await this.mainService.migrateUsersFromGirasolToFirmeasy();
 
       return {
-        'cantidad' : sanitizedUsers.filter(user => user.tipouser_id === 5).length,
-        'usuarios' : sanitizedUsers.filter(user => user.tipouser_id === 5)
+        status: HttpStatus.OK,
+        message: 'Users migrated successfully'
       }
 
     } catch (error) {
-      return Response.caller(error);
+
+      console.log(error);
+
+      throw new HttpException({
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        error: error.message,
+      }, HttpStatus.INTERNAL_SERVER_ERROR, {
+        cause: error,
+      });
+    }
+
+  }
+
+  @Get('api')
+  @HttpCode(200)
+  async updateAPI() {
+
+    try {
+
+      await this.mainService.migrateAPIFromGirasolToFirmeasy();
+
+      return {
+        status: HttpStatus.OK,
+        message: 'API migrated successfully'
+      }
+
+    } catch (error) {
+        
+        console.log(error);
+  
+        throw new HttpException({
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: error.message,
+        }, HttpStatus.INTERNAL_SERVER_ERROR, {
+          cause: error,
+        })
+
+    }
+  }
+
+  @Get('plan_certificados')
+  @HttpCode(200)
+  async updatePlanCertificados() {
+
+    try {
+
+      await this.mainService.migratePlanCertificadoFromGirasolToFirmeasy();
+
+      return {
+        status: HttpStatus.OK,
+        message: 'Plan certificados migrated successfully'
+      }
+
+    } catch (error) {
+        
+        console.log(error);
+  
+        throw new HttpException({
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: error.message,
+        }, HttpStatus.INTERNAL_SERVER_ERROR, {
+          cause: error,
+        });
+    }
+
+  }  
+
+  @Get('certificados')
+  @HttpCode(200)
+  async updateCertificados() {
+
+    try {
+
+      return await this.mainService.migrateCertificadosFromGirasolToFirmeasy();
+
+      return {
+        status: HttpStatus.OK,
+        message: 'Certificados migrated successfully'
+      }
+
+    } catch (error) {
+        
+        console.log(error);
+  
+        throw new HttpException({
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: error.message,
+        }, HttpStatus.INTERNAL_SERVER_ERROR, {
+          cause: error,
+        });
     }
 
   }
