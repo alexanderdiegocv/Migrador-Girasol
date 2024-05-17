@@ -19,7 +19,7 @@ export class FirmeasyService extends PrismaClient implements OnModuleInit {
     // @ts-ignore
     this.$on('query' ,(e) => {
       // @ts-ignore
-      console.dir(e, { depth: null });
+      // console.dir(e, { depth: null });
     });
   }
 
