@@ -420,28 +420,45 @@ export class MainService {
 
             const UsersId = await this.getUsersIdFromCertificadosId(archivosCertificados.map((archivo_certificado) => Number(archivo_certificado.certificado_id)));
 
-            const archivosCertificadosToInsert = archivosCertificados.map((archivoCertificado) => ({
-                id: Number(archivoCertificado.id),
-                certificado_id: Number(archivoCertificado.certificado_id),
-                file_nombre: archivoCertificado.archivo,
-                file_ruta: archivoCertificado.ruta,
-                file_token: uuidv4(),
-                tipo: archivoCertificado.tipo,
-                firma_validar: archivoCertificado.firma_validar,
-                // detalle: archivoCertificado.descripcion,
-                detalle: archivoCertificado.numero_operacion,
-                // numero_operacion: archivoCertificado.numero_operacion,
-                numero_operacion: archivoCertificado.descripcion,
-                activo: 'S',
-                user_id: (UsersId[String(archivoCertificado.certificado_id)] === undefined) ? 1 : UsersId[String(archivoCertificado.certificado_id)],
-                // file_image_qr: archivoCertificado.archivo_qr,
-                // file: archivoCertificado.archivo,
-                // file_qr: archivoCertificado.archivo,
-                // file_code: archivoCertificado.archivo_code,
-                // file_old: archivoCertificado.archivo_old,
-                created_at: new Date(archivoCertificado.created_at),
-                updated_at: new Date(archivoCertificado.updated_at),
-            }));
+            const archivosCertificadosToInsert = archivosCertificados.map((archivoCertificado) => {
+
+                let file_ruta = archivoCertificado.ruta?.replace("public/", "")
+                    file_ruta = file_ruta?.substring(0, file_ruta.lastIndexOf('/'));
+
+                let file_name = archivoCertificado.ruta?.substring(archivoCertificado.ruta.lastIndexOf('/') + 1);
+
+                return {
+                    id: Number(archivoCertificado.id),
+                    certificado_id: Number(archivoCertificado.certificado_id),
+                    // file_nombre: archivoCertificado.archivo,
+                    file_nombre: file_name,
+                    file_ruta: file_ruta,
+                    file_token: uuidv4(),
+                    tipo: (archivoCertificado.tipo === 'DNI ANVERSO')
+                        ? 'DNI_ANEVERSO'
+                        : (archivoCertificado.tipo === 'DNI REVERSO')
+                            ? 'DNI_REVERSO'
+                            : (archivoCertificado.tipo === 'FICHA RUC')
+                                ? 'FICHA_RUC'
+                                : (archivoCertificado.tipo === 'VIGENCIA PODER')
+                                    ? 'VIGENCIA_PODER'
+                                    : archivoCertificado.tipo,
+                    firma_validar: archivoCertificado.firma_validar,
+                    // detalle: archivoCertificado.descripcion,
+                    detalle: archivoCertificado.numero_operacion,
+                    // numero_operacion: archivoCertificado.numero_operacion,
+                    numero_operacion: archivoCertificado.descripcion,
+                    activo: 'S',
+                    user_id: (UsersId[String(archivoCertificado.certificado_id)] === undefined) ? 1 : UsersId[String(archivoCertificado.certificado_id)],
+                    // file_image_qr: archivoCertificado.archivo_qr,
+                    // file: archivoCertificado.archivo,
+                    // file_qr: archivoCertificado.archivo,
+                    // file_code: archivoCertificado.archivo_code,
+                    // file_old: archivoCertificado.archivo_old,
+                    created_at: new Date(archivoCertificado.created_at),
+                    updated_at: new Date(archivoCertificado.updated_at),
+                }
+            });
 
             try {
                 await this.BD_Firmeasy.archivo_certificados.createMany({
@@ -557,9 +574,9 @@ export class MainService {
                 hash: billing.hash, 
                 number: billing.number,
                 number_to_letter: billing.number_to_letter,
-                file_cdr: billing.file_cdr,
-                file_xml: billing.file_xml,
-                file_pdf: billing.file_pdf,
+                file_cdr: billing.file_cdr?.replace("storage/", ""),
+                file_xml: billing.file_xml?.replace("storage/", ""),
+                file_pdf: billing.file_pdf?.replace("storage/", ""),
                 image_qr: billing.image_qr,
                 serial_number: billing.serial_number,
                 serial: billing.serial,
