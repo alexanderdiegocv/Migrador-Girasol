@@ -63,10 +63,10 @@ model anticipos {
   user_id                                BigInt
   created_at                             DateTime?           @db.Timestamp(0)
   updated_at                             DateTime?           @db.Timestamp(0)
-  bolsas                                 bolsas              @relation(fields: [bolsa_id], references: [id], onUpdate: NoAction, map: "anticipos_bolsa_id_foreign")
-  users_anticipos_cliente_user_idTousers users               @relation("anticipos_cliente_user_idTousers", fields: [cliente_user_id], references: [id], onUpdate: NoAction, map: "anticipos_cliente_user_id_foreign")
+  bolsas                                 bolsas?              @relation(fields: [bolsa_id], references: [id], onUpdate: NoAction, map: "anticipos_bolsa_id_foreign")
+  users_anticipos_cliente_user_idTousers users?               @relation("anticipos_cliente_user_idTousers", fields: [cliente_user_id], references: [id], onUpdate: NoAction, map: "anticipos_cliente_user_id_foreign")
   series                                 series?             @relation(fields: [serie_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "anticipos_serie_id_foreign")
-  users_anticipos_user_idTousers         users               @relation("anticipos_user_idTousers", fields: [user_id], references: [id], onUpdate: NoAction, map: "anticipos_user_id_foreign")
+  users_anticipos_user_idTousers         users?               @relation("anticipos_user_idTousers", fields: [user_id], references: [id], onUpdate: NoAction, map: "anticipos_user_id_foreign")
   detalle_anticipos                      detalle_anticipos[]
 }
 
@@ -180,25 +180,6 @@ model archivos {
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model archivos_empresas {
-  id               BigInt    @id @default(autoincrement())
-  empresa_id       BigInt
-  file_nombre      String    @db.VarChar(255)
-  file_ruta        String    @db.VarChar(255)
-  file_token       String?   @db.VarChar(255)
-  tipo             String    @db.VarChar(50)
-  numero_operacion String?   @db.VarChar(50)
-  firma_validar    String?
-  detalle          String?   @db.VarChar(255)
-  activo           String    @default("S") @db.Char(1)
-  user_id          BigInt
-  created_at       DateTime? @db.Timestamp(0)
-  updated_at       DateTime? @db.Timestamp(0)
-  empresas         empresas  @relation(fields: [empresa_id], references: [id], onUpdate: NoAction, map: "archivos_empresas_empresa_id_foreign")
-  users            users     @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "archivos_empresas_user_id_foreign")
-}
-
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model asignar_pagos {
   id                                         BigInt          @id @default(autoincrement())
   cliente_user_id                            BigInt
@@ -252,25 +233,6 @@ model avisos {
   created_at   DateTime? @db.Timestamp(0)
   updated_at   DateTime? @db.Timestamp(0)
   users        users     @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "avisos_user_id_foreign")
-}
-
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model bienes {
-  id          BigInt    @id @default(autoincrement())
-  empresa_id  BigInt
-  socios_id   BigInt
-  tipo        String?   @db.VarChar(40)
-  nombre      String?   @db.VarChar(40)
-  descripcion String?   @db.VarChar(100)
-  marca       String?   @db.VarChar(100)
-  cantidad    Int?
-  precio      Float?
-  total       Float?
-  activo      String    @default("S") @db.Char(1)
-  created_at  DateTime? @db.Timestamp(0)
-  updated_at  DateTime? @db.Timestamp(0)
-  empresas    empresas  @relation(fields: [empresa_id], references: [id], onUpdate: NoAction, map: "bienes_empresa_id_foreign")
-  socios      socios    @relation(fields: [socios_id], references: [id], onUpdate: NoAction, map: "bienes_socios_id_foreign")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -357,25 +319,25 @@ model categorias {
 model certificados {
   id                                         BigInt                          @id @default(autoincrement())
   tipo_certificado_id                        BigInt
-  contador                                   Int?                            @db.SmallInt
-  anio                                       String?                         @db.VarChar(4)
+  contador                                   BigInt?
+  anio                                       String?                         @db.VarChar(6)
   pedido                                     String?                         @db.VarChar(20)
   numero_documento                           String?                         @db.VarChar(20)
   denominacion                               String?                         @db.VarChar(255)
   direccion_fiscal                           String?                         @db.VarChar(255)
-  pais                                       String?                         @db.VarChar(20)
+  pais                                       String?                         @db.VarChar(50)
   ubigeo                                     String?                         @db.VarChar(10)
   departamento                               String?                         @db.VarChar(50)
   provincia                                  String?                         @db.VarChar(50)
   distrito                                   String?                         @db.VarChar(50)
   representante                              String?                         @default("NO") @db.Char(2)
-  dni_representante                          String?                         @db.VarChar(15)
+  dni_representante                          String?                         @db.VarChar(16)
   nombre_representante                       String?                         @db.VarChar(150)
   tipo_documento_id                          BigInt
   numero_documento_titular                   String                          @db.VarChar(20)
   denominacion_titular                       String                          @db.VarChar(255)
-  cargo_titular                              String?                         @db.VarChar(50)
-  area_titular                               String?                         @db.VarChar(50)
+  cargo_titular                              String?                         @db.VarChar(255)
+  area_titular                               String?                         @db.VarChar(255)
   email_envio                                String                          @db.VarChar(50)
   telefono_codigo                            String                          @db.VarChar(20)
   telefono_validacion                        String?                         @db.VarChar(20)
@@ -385,20 +347,20 @@ model certificados {
   direccion_facturacion                      String?                         @db.VarChar(255)
   ubigeo_facturacion                         String?                         @db.VarChar(8)
   acepto_contrato                            String                          @default("SI") @db.Char(2)
-  periodo_certificado                        String                          @default("12") @db.VarChar(5)
+  periodo_certificado                        String                          @default("12") @db.VarChar(6)
   fecha_solicitud                            DateTime                        @db.Timestamp(0)
   fecha_inicio                               DateTime?                       @db.Date
   fecha_vencimiento                          DateTime?                       @db.Date
   fecha_revocado                             DateTime?                       @db.Date
-  archivo_cer                                String?                         @db.VarChar(255)
-  token_cer                                  String?                         @db.VarChar(255)
+  archivo_cer                                String?
+  token_cer                                  String?
   anterior_certificado_id                    BigInt?
-  numero_colegiatura                         String?                         @db.VarChar(10)
+  numero_colegiatura                         String?                         @db.VarChar(50)
   poder                                      String?                         @db.Char(2)
   rne                                        String?                         @db.VarChar(10)
   fecha_llamada                              DateTime?                       @db.Timestamp(0)
   estado_llamada                             String?                         @db.Char(2)
-  link_video_llamada                         String?                         @db.VarChar(255)
+  link_video_llamada                         String?
   operador_user_id                           BigInt
   observacion                                String?                         @db.VarChar(255)
   observacion_voucher                        String                          @default("NO") @db.Char(2)
@@ -433,7 +395,6 @@ model certificados {
   enlaces_cert                               enlaces_cert[]
   factura_certificados                       factura_certificados[]
   historial_certificados                     historial_certificados[]
-  historial_socios                           historial_socios[]
   pago_certificados                          pago_certificados[]
 }
 
@@ -587,52 +548,6 @@ model distritos {
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model empresas {
-  id                           BigInt                @id @default(autoincrement())
-  tipoempresa_id               BigInt?
-  rubro_id                     BigInt?
-  contador                     String?               @db.VarChar(50)
-  pedido                       String?               @db.VarChar(50)
-  anio                         String?               @db.VarChar(50)
-  departamento                 String?               @db.VarChar(50)
-  provincia                    String?               @db.VarChar(50)
-  distrito                     String?               @db.VarChar(50)
-  nombre                       String?               @db.VarChar(80)
-  nombre_1                     String?               @db.VarChar(80)
-  nombre_2                     String?               @db.VarChar(80)
-  direccion                    String?               @db.VarChar(50)
-  tipo_representante           String?               @db.VarChar(250)
-  directorio                   String?               @db.VarChar(250)
-  modalidad                    String?               @db.VarChar(50)
-  objetosocial                 String?
-  codigo_sunat                 String?               @db.VarChar(255)
-  numero_documento_facturacion String?               @db.VarChar(20)
-  denominacion_facturacion     String?               @db.VarChar(255)
-  direccion_facturacion        String?               @db.VarChar(255)
-  ubigeo_facturacion           String?               @db.VarChar(8)
-  costo                        Float?
-  descuento                    String                @default("NO") @db.Char(2)
-  monto_descuento              Float?
-  descuento_autorizado         String?               @db.VarChar(255)
-  token                        String?               @db.VarChar(255)
-  user_id                      BigInt
-  activo                       String                @default("S") @db.Char(1)
-  created_at                   DateTime?             @db.Timestamp(0)
-  updated_at                   DateTime?             @db.Timestamp(0)
-  archivos_empresas            archivos_empresas[]
-  bienes                       bienes[]
-  rubros                       rubros?               @relation(fields: [rubro_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "empresas_rubro_id_foreign")
-  tipo_empresa                 tipo_empresa?         @relation(fields: [tipoempresa_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "empresas_tipoempresa_id_foreign")
-  users                        users                 @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "empresas_user_id_foreign")
-  enlace_constitucion          enlace_constitucion[]
-  enlace_socios                enlace_socios[]
-  historial_empresas           historial_empresas[]
-  historial_socios             historial_socios[]
-  pago_empresas                pago_empresas[]
-  socios                       socios[]
-}
-
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model enlace_certificado_validacion {
   id                  BigInt            @id @default(autoincrement())
   certificado_id      BigInt
@@ -651,40 +566,6 @@ model enlace_certificado_validacion {
   certificados        certificados      @relation(fields: [certificado_id], references: [id], onUpdate: NoAction, map: "enlace_certificado_validacion_certificado_id_foreign")
   tipo_certificados   tipo_certificados @relation(fields: [tipo_certificado_id], references: [id], onUpdate: NoAction, map: "enlace_certificado_validacion_tipo_certificado_id_foreign")
   users               users             @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "enlace_certificado_validacion_user_id_foreign")
-}
-
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model enlace_constitucion {
-  id         BigInt    @id @default(autoincrement())
-  empresa_id BigInt
-  token      String?   @db.VarChar(255)
-  url        String?   @db.VarChar(255)
-  tiempo     Int       @default(1) @db.SmallInt
-  tipo       String?   @db.Char(2)
-  activo     String    @default("S") @db.Char(1)
-  user_id    BigInt
-  created_at DateTime? @db.Timestamp(0)
-  updated_at DateTime? @db.Timestamp(0)
-  empresas   empresas  @relation(fields: [empresa_id], references: [id], onUpdate: NoAction, map: "enlace_constitucion_empresa_id_foreign")
-  users      users     @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "enlace_constitucion_user_id_foreign")
-}
-
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model enlace_socios {
-  id         BigInt    @id @default(autoincrement())
-  empresa_id BigInt
-  socios_id  BigInt
-  token      String?   @db.VarChar(255)
-  url        String?   @db.VarChar(255)
-  tiempo     Int       @default(1) @db.SmallInt
-  tipo       String?   @db.Char(2)
-  activo     String    @default("S") @db.Char(1)
-  user_id    BigInt
-  created_at DateTime? @db.Timestamp(0)
-  updated_at DateTime? @db.Timestamp(0)
-  empresas   empresas  @relation(fields: [empresa_id], references: [id], onUpdate: NoAction, map: "enlace_socios_empresa_id_foreign")
-  socios     socios    @relation(fields: [socios_id], references: [id], onUpdate: NoAction, map: "enlace_socios_socios_id_foreign")
-  users      users     @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "enlace_socios_user_id_foreign")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -762,7 +643,7 @@ model historial_certificados {
   id             BigInt       @id @default(autoincrement())
   certificado_id BigInt
   estado         String       @db.VarChar(50)
-  codigo         String?      @db.Char(1)
+  codigo         String?      @db.Char(2)
   comentario     String       @db.VarChar(100)
   activo         String       @default("S") @db.Char(1)
   user_id        BigInt
@@ -770,38 +651,6 @@ model historial_certificados {
   updated_at     DateTime?    @db.Timestamp(0)
   certificados   certificados @relation(fields: [certificado_id], references: [id], onUpdate: NoAction, map: "historial_certificados_certificado_id_foreign")
   users          users        @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "historial_certificados_user_id_foreign")
-}
-
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model historial_empresas {
-  id         BigInt    @id @default(autoincrement())
-  empresa_id BigInt
-  estado     String?   @db.VarChar(50)
-  codigo     String?   @db.Char(1)
-  activo     String    @default("S") @db.Char(1)
-  user_id    BigInt
-  created_at DateTime? @db.Timestamp(0)
-  updated_at DateTime? @db.Timestamp(0)
-  empresas   empresas  @relation(fields: [empresa_id], references: [id], onUpdate: NoAction, map: "historial_empresas_empresa_id_foreign")
-  users      users     @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "historial_empresas_user_id_foreign")
-}
-
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model historial_socios {
-  id             BigInt        @id @default(autoincrement())
-  empresa_id     BigInt
-  certificado_id BigInt?
-  socios_id      BigInt
-  estado         String?       @db.VarChar(50)
-  codigo         String?       @db.Char(1)
-  activo         String        @default("S") @db.Char(1)
-  user_id        BigInt
-  created_at     DateTime?     @db.Timestamp(0)
-  updated_at     DateTime?     @db.Timestamp(0)
-  certificados   certificados? @relation(fields: [certificado_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "historial_socios_certificado_id_foreign")
-  empresas       empresas      @relation(fields: [empresa_id], references: [id], onUpdate: NoAction, map: "historial_socios_empresa_id_foreign")
-  socios         socios        @relation(fields: [socios_id], references: [id], onUpdate: NoAction, map: "historial_socios_socios_id_foreign")
-  users          users         @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "historial_socios_user_id_foreign")
 }
 
 model historiales {
@@ -863,7 +712,7 @@ model menus {
   updated_at   DateTime?      @db.Timestamp(0)
   users        users          @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "menus_user_id_foreign")
   rol_submenus rol_submenus[]
-  menu_submenus submenus[]
+  menu_submenus     submenus[]
 }
 
 model migrations {
@@ -901,24 +750,6 @@ model pago_certificados {
   updated_at       DateTime?    @db.Timestamp(0)
   certificados     certificados @relation(fields: [certificado_id], references: [id], onUpdate: NoAction, map: "pago_certificados_certificado_id_foreign")
   users            users        @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "pago_certificados_user_id_foreign")
-}
-
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model pago_empresas {
-  id               BigInt    @id @default(autoincrement())
-  empresa_id       BigInt
-  medio_pago       String    @db.VarChar(50)
-  numero_operacion String    @db.VarChar(20)
-  descripcion      String?   @db.VarChar(100)
-  monto            Float
-  fecha_pago       DateTime? @db.Date
-  observacion      String?   @db.VarChar(255)
-  activo           String    @default("S") @db.Char(1)
-  user_id          BigInt
-  created_at       DateTime? @db.Timestamp(0)
-  updated_at       DateTime? @db.Timestamp(0)
-  empresas         empresas  @relation(fields: [empresa_id], references: [id], onUpdate: NoAction, map: "pago_empresas_empresa_id_foreign")
-  users            users     @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "pago_empresas_user_id_foreign")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -1111,17 +942,6 @@ model roles {
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model rubros {
-  id         BigInt     @id @default(autoincrement())
-  nombre     String?    @db.VarChar(50)
-  esquema    String?    @db.VarChar(1000)
-  activo     String     @default("S") @db.Char(1)
-  created_at DateTime?  @db.Timestamp(0)
-  updated_at DateTime?  @db.Timestamp(0)
-  empresas   empresas[]
-}
-
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model series {
   id                   BigInt                 @id @default(autoincrement())
   description          String                 @db.VarChar(50)
@@ -1137,39 +957,6 @@ model series {
   pagos                pagos[]
   recargas             recargas[]
   users                users                  @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "series_user_id_foreign")
-}
-
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model socios {
-  id                       BigInt             @id @default(autoincrement())
-  empresa_id               BigInt
-  tipo_documento_id        BigInt
-  numero_documento_titular String?            @db.VarChar(12)
-  nombre_completo          String?            @db.VarChar(60)
-  direccion                String?            @db.VarChar(100)
-  cargo                    String?            @db.VarChar(40)
-  telefono                 String?            @db.VarChar(10)
-  correo                   String?            @db.VarChar(50)
-  pais                     String?            @db.VarChar(50)
-  ubigeo                   String?            @db.VarChar(50)
-  departamento             String?            @db.VarChar(50)
-  provincia                String?            @db.VarChar(50)
-  distrito                 String?            @db.VarChar(50)
-  nacionalidad             String?            @db.VarChar(320)
-  estado_civil             String?            @db.VarChar(40)
-  profesion                String?            @db.VarChar(60)
-  fecha_nacimiento         DateTime?          @db.Date
-  socio_id                 BigInt?
-  activo                   String             @default("S") @db.Char(1)
-  created_at               DateTime?          @db.Timestamp(0)
-  updated_at               DateTime?          @db.Timestamp(0)
-  bienes                   bienes[]
-  enlace_socios            enlace_socios[]
-  historial_socios         historial_socios[]
-  empresas                 empresas           @relation(fields: [empresa_id], references: [id], onUpdate: NoAction, map: "socios_empresa_id_foreign")
-  socios                   socios?            @relation("sociosTosocios", fields: [socio_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "socios_socio_id_foreign")
-  other_socios             socios[]           @relation("sociosTosocios")
-  tipo_documentos          tipo_documentos    @relation(fields: [tipo_documento_id], references: [id], onUpdate: NoAction, map: "socios_tipo_documento_id_foreign")
 }
 
 model sub_users_carpeta {
@@ -1228,24 +1015,8 @@ model tipo_documentos {
   updated_at         DateTime?            @db.Timestamp(0)
   certificados       certificados[]
   dato_facturaciones dato_facturaciones[]
-  socios             socios[]
   users              users[]
   ventas             ventas[]
-}
-
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model tipo_empresa {
-  id          BigInt     @id @default(autoincrement())
-  nombre      String     @db.VarChar(200)
-  descripcion String     @db.VarChar(300)
-  min_socio   Int
-  max_socio   Int
-  user_id     BigInt
-  activo      String     @default("S") @db.Char(1)
-  created_at  DateTime?  @db.Timestamp(0)
-  updated_at  DateTime?  @db.Timestamp(0)
-  empresas    empresas[]
-  users       users      @relation(fields: [user_id], references: [id], onUpdate: NoAction, map: "tipo_empresa_user_id_foreign")
 }
 
 model tipousers {
@@ -1269,9 +1040,9 @@ model users {
   nombres                                                      String                          @db.VarChar(255)
   codigo_celular                                               String                          @default("+51") @db.VarChar(5)
   celular                                                      String                          @db.VarChar(15)
-  email                                                        String                          @unique(map: "users_email_unique") @db.VarChar(50)
+  email                                                        String                          @unique(map: "users_email_unique") @db.VarChar(255)
   clave_secreta                                                String                          @db.Char(6)
-  codigo_afiliacion                                            String?                         @db.Char(8)
+  codigo_afiliacion                                            String?                         @db.Char(10)
   password                                                     String?                         @db.VarChar(255)
   firma                                                        String?                         @db.VarChar(255)
   firma_auth                                                   String?                         @db.VarChar(255)
@@ -1302,7 +1073,6 @@ model users {
   apis                                                         apis[]
   archivo_certificados                                         archivo_certificados[]
   archivos                                                     archivos[]
-  archivos_empresas                                            archivos_empresas[]
   asignar_pagos_asignar_pagos_cliente_user_idTousers           asignar_pagos[]                 @relation("asignar_pagos_cliente_user_idTousers")
   asignar_pagos_asignar_pagos_user_idTousers                   asignar_pagos[]                 @relation("asignar_pagos_user_idTousers")
   avisos                                                       avisos[]
@@ -1320,22 +1090,16 @@ model users {
   detalle_pagos_detalle_pagos_cliente_user_idTousers           detalle_pagos[]                 @relation("detalle_pagos_cliente_user_idTousers")
   detalle_pagos_detalle_pagos_user_idTousers                   detalle_pagos[]                 @relation("detalle_pagos_user_idTousers")
   detalles_validacion_identidad                                detalles_validacion_identidad[]
-  empresas                                                     empresas[]
   enlace_certificado_validacion                                enlace_certificado_validacion[]
-  enlace_constitucion                                          enlace_constitucion[]
-  enlace_socios                                                enlace_socios[]
   enlaces                                                      enlaces[]
   factura_certificados                                         factura_certificados[]
   historial_certificados                                       historial_certificados[]
-  historial_empresas                                           historial_empresas[]
-  historial_socios                                             historial_socios[]
   historiales                                                  historiales[]
   horavalidacion                                               horavalidacion[]
   mensajes                                                     mensajes[]
   menus                                                        menus[]
   notificaciones                                               notificaciones[]
   pago_certificados                                            pago_certificados[]
-  pago_empresas                                                pago_empresas[]
   pagos_pagos_cliente_user_idTousers                           pagos[]                         @relation("pagos_cliente_user_idTousers")
   pagos_pagos_user_idTousers                                   pagos[]                         @relation("pagos_user_idTousers")
   plan_certificados                                            plan_certificados[]
@@ -1347,7 +1111,6 @@ model users {
   sub_users_carpeta_sub_users_carpeta_sub_user_idTousers       sub_users_carpeta[]             @relation("sub_users_carpeta_sub_user_idTousers")
   submenus                                                     submenus[]
   tipo_certificados                                            tipo_certificados[]
-  tipo_empresa                                                 tipo_empresa[]
   users_users_parent_user_idTousers                            users?                          @relation("users_parent_user_idTousers", fields: [parent_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "users_parent_user_id_foreign")
   other_users_users_parent_user_idTousers                      users[]                         @relation("users_parent_user_idTousers")
   categorias                                                   categorias                      @relation(fields: [plan_id], references: [id], onUpdate: NoAction, map: "users_plan_id_foreign")

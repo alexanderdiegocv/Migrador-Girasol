@@ -2,6 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { FirmeasyService } from 'src/prisma_firmeasy/firmeasy.service';
 import { GirasolService } from 'src/prisma_girasol/girasol.service';
 import { users as UserFirmeasy } from '@prisma/clients/bd_postgres';
+import { tipo_certificados as TipoCertificadoFirmeasy } from '@prisma/clients/bd_postgres';
+import { bolsas as BolsasFirmeasy } from '@prisma/clients/bd_postgres';
+import { anticipos as AnticiposFirmeasy } from '@prisma/clients/bd_postgres';
 import { users as UserGirasol } from '@prisma/clients/bd_mysql';
 import { apis as APIGirasol } from '@prisma/clients/bd_mysql';
 import { plancertificados as PlanCertificadoGirasol } from '@prisma/clients/bd_mysql';
@@ -23,10 +26,9 @@ export class MainService {
     // Migrations
 
     async migrateUsersFromGirasolToFirmeasy(): Promise<void> {
-        await this.BD_Firmeasy
-            .$executeRaw`SET session_replication_role = 'replica';`;
+        // await this.BD_Firmeasy.$queryRaw`ALTER TABLE users DISABLE TRIGGER ALL;`;
 
-        await this.BD_Firmeasy.users.deleteMany();
+        // await this.BD_Firmeasy.users.deleteMany(); return Promise.resolve();
 
         await this.resetSequenceUser();
 
@@ -86,17 +88,530 @@ export class MainService {
 
         const lastUserId = lastUser ? lastUser.id : 1;
 
-        await this.BD_Firmeasy
-            .$executeRaw`SET session_replication_role = 'origin';`;
+        // await this.BD_Firmeasy.$queryRaw`ALTER TABLE users ENABLE TRIGGER ALL;`;
 
         await this.setSequenceUser(Number(lastUserId));
     }
 
-    async migrateAPIFromGirasolToFirmeasy(): Promise<void> {
-        await this.BD_Firmeasy
-            .$executeRaw`SET session_replication_role = 'replica';`;
+    async migrateTipoCertificadoFromGirasolToFirmeasy(): Promise<void> {
+        
+        // await this.BD_Firmeasy.$queryRaw`ALTER TABLE tipo_certificados DISABLE TRIGGER ALL;`;
 
-        await this.BD_Firmeasy.apis.deleteMany();
+        // await this.BD_Firmeasy.tipo_certificados.deleteMany(); return Promise.resolve();
+
+        await this.resetSequenceTipocertificado()
+
+        const tipoCertificados: TipoCertificadoFirmeasy[] = [
+            {
+                id: BigInt(1),
+                nombre: 'CERTIFICADO PARA FACTURACIÓN ELECTRÓNICA SUNAT',
+                descripcion: 'PARA FIRMAR FACTURAS ELECTRÓNICAS DE LA SUNAT',
+                activo: 'S',
+                user_id: BigInt(1),
+                created_at: new Date(),
+                updated_at: new Date(),
+            },
+            {
+                id: BigInt(2),
+                nombre: 'CERTIFICADO PARA DOCUMENTOS ELECTRÓNICOS',
+                descripcion: 'PARA FIRMAR TODOS LOS ARCHIVOS PDF QUE DESEE',
+                activo: 'S',
+                user_id: BigInt(1),
+                created_at: new Date(),
+                updated_at: new Date(),
+            },
+            {
+                id: BigInt(3),
+                nombre: 'CERTIFICADO PARA PERSONAS NATURALES',
+                descripcion: 'PARA FIRMAR PERSONAS CON DNI',
+                activo: 'S',
+                user_id: BigInt(1),
+                created_at: new Date(),
+                updated_at: new Date(),
+            },
+            {
+                id: BigInt(4),
+                nombre: 'CERTIFICADO PARA PROFESIONALES',
+                descripcion: 'PARA FIRMAR PERSONAS CON NÚMERO DE COLEGIATURA',
+                activo: 'S',
+                user_id: BigInt(1),
+                created_at: new Date(),
+                updated_at: new Date(),
+            },
+            {
+                id: BigInt(5),
+                nombre: 'CERTIFICADO PARA AGENTE AUTOMATIZADO',
+                descripcion: 'FIRMA MASIVA',
+                activo: 'S',
+                user_id: BigInt(1),
+                created_at: new Date(),
+                updated_at: new Date(),
+            },
+            {
+                id: BigInt(6),
+                nombre: 'CERTIFICADO PARA OSE',
+                descripcion: 'OSE',
+                activo: 'S',
+                user_id: BigInt(1),
+                created_at: new Date(),
+                updated_at: new Date(),
+            },
+            {
+                id: BigInt(7),
+                nombre: 'SSL VALIDACION DE UN DOMINIO O PAGINA WEB',
+                descripcion: 'SSL',
+                activo: 'S',
+                user_id: BigInt(1),
+                created_at: new Date(),
+                updated_at: new Date(),
+            },
+            {
+                id: BigInt(8),
+                nombre: 'SSL - WILDCARD',
+                descripcion: 'TODOS LOS SUBDOMINIOS DE UN DOMINIO',
+                activo: 'S',
+                user_id: BigInt(1),
+                created_at: new Date(),
+                updated_at: new Date(),
+            }
+        ]
+
+        const chunkSize = 5;
+
+        const chunks_tipo_certificados: TipoCertificadoFirmeasy[][] = [];
+
+        for (let i = 0; i < tipoCertificados.length; i += chunkSize) {
+            chunks_tipo_certificados.push(tipoCertificados.slice(i, i + chunkSize));
+        }
+
+        for await (const tipo_certificados of chunks_tipo_certificados) {
+            console.log(`Inserting ${tipo_certificados.length} Tipo Certificados`);
+
+            const tipo_certificadoToInsert = tipo_certificados.map((tipo_certificado) => ({
+                id: tipo_certificado.id,
+                nombre: tipo_certificado.nombre,
+                descripcion: tipo_certificado.descripcion,
+                activo: tipo_certificado.activo,
+                user_id: tipo_certificado.user_id,
+                created_at: tipo_certificado.created_at,
+                updated_at: tipo_certificado.updated_at,
+            }));
+
+            try {
+                await this.BD_Firmeasy.tipo_certificados.createMany({
+                    data: tipo_certificadoToInsert,
+                });
+            } catch (error) {
+                console.log('Error inserting users:', error);
+                console.log('Tipo Certificados to insert:', tipo_certificadoToInsert);
+            }
+        }
+
+        const lastTipoCertificado = await this.BD_Firmeasy.tipo_certificados.findFirst({
+            select: { id: true },
+            orderBy: { id: 'desc' },
+        });
+
+        const lastTipoCertificadoId = lastTipoCertificado ? lastTipoCertificado.id : 1;
+
+        // await this.BD_Firmeasy.$queryRaw`ALTER TABLE tipo_certificados ENABLE TRIGGER ALL;`;
+
+        await this.setSequenceTipocertificado(Number(lastTipoCertificadoId));
+    }
+
+    async migrateBolsasFromGirasolToFirmeasy(): Promise<void> {
+
+        // await this.BD_Firmeasy.bolsas.deleteMany(); return Promise.resolve();
+
+        await this.resetSequenceBolsas()
+
+        const bolsas: BolsasFirmeasy[] = [
+            {
+                id: BigInt(6),
+                tipo_certificado_id: BigInt(1),
+                nombre: '5 CERTIFICADOS',
+                descripcion: 'VALIDO PARA LA COMPRA DE 5 CERTIFICADOS DE FACTURACION ELECTRONICA',
+                cantidad: 5,
+                precio_unidad: 170,
+                total: 850,
+                activo: 'S',
+                user_id: BigInt(1),
+                created_at: new Date(),
+                updated_at: new Date(),
+            },
+            {
+                id: BigInt(7),
+                tipo_certificado_id: BigInt(1),
+                nombre: '10 CERTIFICADOS',
+                descripcion: 'VALIDO PARA LA COMPRA DE 10 CERTIFICADOS DE FACTURACION ELECTRONICA',
+                cantidad: 10,
+                precio_unidad: 142,
+                total: 1420,
+                activo: 'S',
+                user_id: BigInt(1),
+                created_at: new Date(),
+                updated_at: new Date(),
+            },
+            {
+                id: BigInt(8),
+                tipo_certificado_id: BigInt(1),
+                nombre: '20 CERTIFICADOS',
+                descripcion: 'VALIDO PARA LA COMPRA DE 20 CERTIFICADOS DE FACTURACION ELECTRONICA',
+                cantidad: 20,
+                precio_unidad: 136,
+                total: 2720,
+                activo: 'S',
+                user_id: BigInt(1),
+                created_at: new Date(),
+                updated_at: new Date(),
+            },
+            {
+                id: BigInt(9),
+                tipo_certificado_id: BigInt(1),
+                nombre: '50 CERTIFICADOS',
+                descripcion: 'VALIDO PARA LA COMPRA DE 50 CERTIFICADOS DE FACTURACION ELECTRONICA',
+                cantidad: 50,
+                precio_unidad: 104,
+                total: 5200,
+                activo: 'S',
+                user_id: BigInt(1),
+                created_at: new Date(),
+                updated_at: new Date(),
+            }
+        ]
+
+        const chunkSize = 2;
+
+        const chunks_bolsas: BolsasFirmeasy[][] = [];
+
+        for (let i = 0; i < bolsas.length; i += chunkSize) {
+            chunks_bolsas.push(bolsas.slice(i, i + chunkSize));
+        }
+
+        for await (const bolsas of chunks_bolsas) {
+            console.log(`Inserting ${bolsas.length} Tipo Certificados`);
+
+            const bolsasToInsert = bolsas.map((bolsa) => ({
+                id: bolsa.id,
+                tipo_certificado_id: bolsa.tipo_certificado_id,
+                nombre: bolsa.nombre,
+                descripcion: bolsa.descripcion,
+                cantidad: bolsa.cantidad,
+                precio_unidad: bolsa.precio_unidad,
+                total: bolsa.total,
+                activo: bolsa.activo,
+                user_id: bolsa.user_id,
+                created_at: bolsa.created_at,
+                updated_at: bolsa.updated_at,
+            }));
+
+            try {
+                await this.BD_Firmeasy.bolsas.createMany({
+                    data: bolsasToInsert,
+                });
+            } catch (error) {
+                console.log('Error inserting bolsas:', error);
+                console.log('Bolsas to insert:', bolsasToInsert);
+            }
+        }
+
+        const lastBolsa = await this.BD_Firmeasy.bolsas.findFirst({
+            select: { id: true },
+            orderBy: { id: 'desc' },
+        });
+
+        const lastBolsaId = lastBolsa ? lastBolsa.id : 1;
+
+        await this.setSequenceBolsas(Number(lastBolsaId));
+    }
+
+    async migrateAnticiposFromGirasolToFirmeasy(): Promise<void> {
+
+        // await this.BD_Firmeasy.anticipos.deleteMany(); return Promise.resolve();
+
+        await this.resetSequenceAnticipos()
+
+        const anticipos: AnticiposFirmeasy[] = [
+            {
+                id: BigInt(1),
+                bolsa_id: BigInt(6),
+                cliente_user_id: BigInt(287),
+                cantidad: 5,
+                stock: 5,
+                total: 850,
+                subtotal: null,
+                igv: null,
+                pago_medio: null,
+                pago_operacion: null,
+                pago_descripcion: null,
+                pago_fecha: null,
+                pago_monto: null,
+                pago_observacion: null,
+                codigo_sunat: null,
+                departamento: null,
+                provincia: null,
+                distrito: null,
+                external_id: null,
+                file_name: null,
+                file_cdr: null,
+                file_pdf: null,
+                file_xml: null,
+                fecha_emision: null,
+                serie_id: null,
+                hash: null,
+                number: null,
+                number_to_letter: null,
+                imagen_qr: null,
+                serial_number: null,
+                serial: null,
+                state_sunat: null,
+                message_sunat: null,
+                observacion: null,
+                ticket_anulado: null, 
+                external_id_anulado: null,
+                codigo_anulado: null,
+                mensaje_anulado: null,
+                xml_anulado: null,
+                cdr_anulado: null,
+                archivo: '1683386782-ClijyvQOTJ.jpg',
+                archivo_token: 'f2a5920e-f592-45bb-88fc-33d68a3b2fb1',
+                archivo_ruta: 'BOLSA_PAGOS',
+                documento_facturacion: '20600015487',
+                denominacion_facturacion: 'SISTEPCNAUT E.I.R.L.',
+                direccion_facturacion: 'PJ. SAMUEL PASTOR NRO. 225',
+                ubigeo_facturacion: '170101',
+                anulado: 'NO',   
+                uso: 'VA',
+                activo: 'S',
+                user_id: BigInt(287),
+                created_at: new Date(),
+                updated_at: new Date()
+            },
+            {
+                id: BigInt(2),
+                bolsa_id: BigInt(7),
+                cliente_user_id: BigInt(275),
+                cantidad: 10,
+                stock: 10,
+                total: 1420,
+                subtotal: null,
+                igv: null,
+                pago_medio: null,
+                pago_operacion: null,
+                pago_descripcion: null,
+                pago_fecha: null,
+                pago_monto: null,
+                pago_observacion: null,
+                codigo_sunat: null,
+                departamento: null,
+                provincia: null,
+                distrito: null,
+                external_id: null,
+                file_name: null,
+                file_cdr: null,
+                file_pdf: null,
+                file_xml: null,
+                fecha_emision: null,
+                serie_id: null,
+                hash: null,
+                number: null,
+                number_to_letter: null,
+                imagen_qr: null,
+                serial_number: null,
+                serial: null,
+                state_sunat: null,
+                message_sunat: null,
+                observacion: null,
+                ticket_anulado: null, 
+                external_id_anulado: null,
+                codigo_anulado: null,
+                mensaje_anulado: null,
+                xml_anulado: null,
+                cdr_anulado: null,
+                archivo: '1684946991-TqTaBejT6P.jpg',
+                archivo_token: '66bbc9a0-1f33-489f-ac83-89782975f0b6',
+                archivo_ruta: 'BOLSA_PAGOS',
+                documento_facturacion: null,
+                denominacion_facturacion: null,
+                direccion_facturacion: null,
+                ubigeo_facturacion: null,
+                anulado: 'NO',   
+                uso: 'VA',
+                activo: 'S',
+                user_id: BigInt(275),
+                created_at: new Date(),
+                updated_at: new Date()
+            },
+            {
+                id: BigInt(3),
+                bolsa_id: BigInt(7),
+                cliente_user_id: BigInt(105),
+                cantidad: 10,
+                stock: 10,
+                total: 1420,
+                subtotal: null,
+                igv: null,
+                pago_medio: null,
+                pago_operacion: null,
+                pago_descripcion: null,
+                pago_fecha: null,
+                pago_monto: null,
+                pago_observacion: null,
+                codigo_sunat: null,
+                departamento: null,
+                provincia: null,
+                distrito: null,
+                external_id: null,
+                file_name: null,
+                file_cdr: null,
+                file_pdf: null,
+                file_xml: null,
+                fecha_emision: null,
+                serie_id: null,
+                hash: null,
+                number: null,
+                number_to_letter: null,
+                imagen_qr: null,
+                serial_number: null,
+                serial: null,
+                state_sunat: null,
+                message_sunat: null,
+                observacion: null,
+                ticket_anulado: null, 
+                external_id_anulado: null,
+                codigo_anulado: null,
+                mensaje_anulado: null,
+                xml_anulado: null,
+                cdr_anulado: null,
+                archivo: '1711324912-ybCwd8lpB9.jpg',
+                archivo_token: '80d91443-c18e-46a7-9429-2e0a20e84664',
+                archivo_ruta: 'BOLSA_PAGOS',
+                documento_facturacion: '20604889244',
+                denominacion_facturacion: 'TECNOLOGIAS JCF SOFT E.I.R.L. - JCF SOFT E.I.R.L.',
+                direccion_facturacion: 'AV. SAMUEL ALCAZAR NRO. 100 DPTO. 604 LIMA - LIMA - RIMAC',
+                ubigeo_facturacion: '150128',
+                anulado: 'NO',   
+                uso: 'VA',
+                activo: 'S',
+                user_id: BigInt(105),
+                created_at: new Date(),
+                updated_at: new Date()
+            },
+            {
+                id: BigInt(4),
+                bolsa_id: BigInt(7),
+                cliente_user_id: BigInt(287),
+                cantidad: 10,
+                stock: 10,
+                total: 1420,
+                subtotal: null,
+                igv: null,
+                pago_medio: null,
+                pago_operacion: null,
+                pago_descripcion: null,
+                pago_fecha: null,
+                pago_monto: null,
+                pago_observacion: null,
+                codigo_sunat: null,
+                departamento: null,
+                provincia: null,
+                distrito: null,
+                external_id: null,
+                file_name: null,
+                file_cdr: null,
+                file_pdf: null,
+                file_xml: null,
+                fecha_emision: null,
+                serie_id: null,
+                hash: null,
+                number: null,
+                number_to_letter: null,
+                imagen_qr: null,
+                serial_number: null,
+                serial: null,
+                state_sunat: null,
+                message_sunat: null,
+                observacion: null,
+                ticket_anulado: null, 
+                external_id_anulado: null,
+                codigo_anulado: null,
+                mensaje_anulado: null,
+                xml_anulado: null,
+                cdr_anulado: null,
+                archivo: '1713975841-S5ZDwjKwvO.pdf',
+                archivo_token: 'b6d4e16a-1aac-4659-a4dc-469def204044',
+                archivo_ruta: 'BOLSA_PAGOS',
+                documento_facturacion: '10440302993',
+                denominacion_facturacion: 'ASSELNY MORALES VILLAGARAY',
+                direccion_facturacion: 'PJ. SAMUEL PASTOR 225',
+                ubigeo_facturacion: '170101',
+                anulado: 'NO',   
+                uso: 'VA',
+                activo: 'S',
+                user_id: BigInt(287),
+                created_at: new Date(),
+                updated_at: new Date()
+            }
+        ]
+
+        const chunkSize = 2;
+
+        const chunks_anticipos: AnticiposFirmeasy[][] = [];
+
+        for (let i = 0; i < anticipos.length; i += chunkSize) {
+            chunks_anticipos.push(anticipos.slice(i, i + chunkSize));
+        }
+
+        for await (const anticipos of chunks_anticipos) {
+            console.log(`Inserting ${anticipos.length} Tipo Certificados`);
+
+            const anticiposToInsert = anticipos.map((anticipo) => ({
+                id: anticipo.id,
+                bolsa_id: anticipo.bolsa_id,
+                cliente_user_id: anticipo.cliente_user_id,
+                cantidad: anticipo.cantidad,
+                stock: anticipo.stock,
+                total: anticipo.total,
+                archivo: anticipo.archivo,
+                archivo_token: anticipo.archivo_token,
+                archivo_ruta: anticipo.archivo_ruta,
+                documento_facturacion: anticipo.documento_facturacion,
+                denominacion_facturacion: anticipo.denominacion_facturacion,
+                direccion_facturacion: anticipo.direccion_facturacion,
+                ubigeo_facturacion: anticipo.ubigeo_facturacion,
+                anulado: anticipo.anulado,  
+                uso: anticipo.uso,
+                activo: anticipo.activo,
+                user_id: anticipo.user_id,
+                created_at: anticipo.created_at,
+                updated_at: anticipo.updated_at,
+            }));
+
+            try {
+                await this.BD_Firmeasy.anticipos.createMany({
+                    data: anticiposToInsert,
+                });
+            } catch (error) {
+                console.log('Error inserting anticipos:', error);
+                console.log('Anticipos to insert:', anticiposToInsert);
+            }
+        }
+
+        const lastAnticipo = await this.BD_Firmeasy.anticipos.findFirst({
+            select: { id: true },
+            orderBy: { id: 'desc' },
+        });
+
+        const lastAnticipoId = lastAnticipo ? lastAnticipo.id : 1;
+
+        await this.setSequenceAnticipos(Number(lastAnticipoId));
+    }
+
+    async migrateAPIFromGirasolToFirmeasy(): Promise<void> {
+
+        // await this.BD_Firmeasy.$queryRaw`ALTER TABLE apis DISABLE TRIGGER ALL;`;
+
+        // await this.BD_Firmeasy.apis.deleteMany(); return Promise.resolve();
 
         await this.resetSequenceAPI();
 
@@ -138,17 +653,15 @@ export class MainService {
             }),
         );
 
-        await this.BD_Firmeasy
-            .$executeRaw`SET session_replication_role = 'origin';`;
+        // await this.BD_Firmeasy.$queryRaw`ALTER TABLE apis ENABLE TRIGGER ALL;`;
 
         await this.setSequenceAPI(apisGirasol.length);
     }
 
     async migratePlanCertificadoFromGirasolToFirmeasy(): Promise<void> {
-        await this.BD_Firmeasy
-            .$executeRaw`SET session_replication_role = 'replica';`;
+        // await this.BD_Firmeasy.$queryRaw`ALTER TABLE plan_certificados DISABLE TRIGGER ALL;`;
 
-        await this.BD_Firmeasy.plan_certificados.deleteMany();
+        // await this.BD_Firmeasy.plan_certificados.deleteMany(); return Promise.resolve();
 
         await this.resetSequencePlanCertificado();
 
@@ -198,18 +711,16 @@ export class MainService {
             }),
         );
 
-        await this.BD_Firmeasy
-            .$executeRaw`SET session_replication_role = 'origin';`;
+        // await this.BD_Firmeasy.$queryRaw`ALTER TABLE plan_certificados ENABLE TRIGGER ALL;`;
 
         await this.setSequencePlanCertificado(planCertificadoGirasol.length);
     }
 
     async migrateCertificadosFromGirasolToFirmeasy(): Promise<void> {
         
-        await this.BD_Firmeasy
-            .$executeRaw`SET session_replication_role = 'replica';`;
+        // await this.BD_Firmeasy.$queryRaw`ALTER TABLE certificados DISABLE TRIGGER ALL;`;
 
-        await this.BD_Firmeasy.certificados.deleteMany();
+        // await this.BD_Firmeasy.certificados.deleteMany(); return Promise.resolve();
 
         await this.resetSequenceCertificado();
 
@@ -330,39 +841,64 @@ export class MainService {
 
         const lastCertificadoId = lastCertificado ? lastCertificado.id : 1;
 
-        await this.BD_Firmeasy
-            .$executeRaw`SET session_replication_role = 'origin';`;
+        // await this.BD_Firmeasy.$queryRaw`ALTER TABLE certificados ENABLE TRIGGER ALL;`;
 
         await this.setSequenceCertificado(Number(lastCertificadoId));
     }
 
-    async migrateHistoriaCertificadoFromGirasolToFirmeasy(): Promise<void> {
-        
-        await this.BD_Firmeasy.$executeRaw`SET session_replication_role = 'replica';`;
+    replacer(key, value) {
+        return typeof value === 'bigint' ? value.toString() : value;
+    }
 
-        await this.BD_Firmeasy.historial_certificados.deleteMany();
+    async migrateHistoriaCertificadoFromGirasolToFirmeasy() {
+        
+        // await this.BD_Firmeasy.$queryRaw`ALTER TABLE historial_certificados DISABLE TRIGGER ALL;`;
+
+        // await this.BD_Firmeasy.historial_certificados.deleteMany(); return Promise.resolve();
 
         await this.resetSequenceHistoriaCertificado();
 
         const historiaCertificadoGirasol: HistoriaCertificadoGirasol[] = await this.getAllHistoriaCertificadoGirasol();
 
-        const chunkSize = 5000;
+        const groupedByCertificadoId: { [key: string]: HistoriaCertificadoGirasol[] } = historiaCertificadoGirasol.reduce((acc, current) => {
+            if (!acc[current.certificado_id]) {
+                acc[current.certificado_id] = [];
+            }
+            acc[current.certificado_id].push(current);
+            return acc;
+        }, {});
 
+        Object.keys(groupedByCertificadoId).forEach(certificadoId => {
+            groupedByCertificadoId[certificadoId].push({
+                estado: "VERIFICACIÓN DE VALIDACIÓN",
+                codigo: "10",
+                activo: "N",
+                comentario: "primary",
+                certificado_id: Number(certificadoId),
+                created_at: new Date(),
+                updated_at: new Date(),
+            } as HistoriaCertificadoGirasol);
+        });
+
+        // Convertir el objeto agrupado a un array de arrays
+        const allHistoriales = Object.values(groupedByCertificadoId).flat();
+
+        // Crear los chunks
+        const chunkSize = 1000;
         const chunks_historiaCertificados: HistoriaCertificadoGirasol[][] = [];
 
-        for (let i = 0; i < historiaCertificadoGirasol.length; i += chunkSize) {
-            chunks_historiaCertificados.push(historiaCertificadoGirasol.slice(i, i + chunkSize));
+        for (let i = 0; i < allHistoriales.length; i += chunkSize) {
+            chunks_historiaCertificados.push(allHistoriales.slice(i, i + chunkSize));
         }
 
         for await (const historiaCertificados of chunks_historiaCertificados) {
             console.log(`Inserting ${historiaCertificados.length} historiaCertificados`);
-
+    
             const UsersId = await this.getUsersIdFromCertificadosId(
                 historiaCertificados.map((certificado) => Number(certificado.certificado_id)),
             );
-
+    
             const historiaCertificadosToInsert = historiaCertificados.map((historiaCertificado) => ({
-                id: Number(historiaCertificado.id),
                 certificado_id: Number(historiaCertificado.certificado_id),
                 estado: historiaCertificado.estado,
                 codigo: historiaCertificado.codigo,
@@ -372,7 +908,7 @@ export class MainService {
                 created_at: new Date(historiaCertificado.created_at),
                 updated_at: new Date(historiaCertificado.updated_at),
             }));
-
+    
             try {
                 await this.BD_Firmeasy.historial_certificados.createMany({
                     data: historiaCertificadosToInsert,
@@ -380,12 +916,12 @@ export class MainService {
             } catch (error) {
                 console.log('Error inserting historiaCertificados:', error);
                 console.log('HistoriaCertificados to insert:', historiaCertificadosToInsert);
-
+    
                 throw error;
             }
         }
 
-        await this.BD_Firmeasy.$executeRaw`SET session_replication_role = 'origin';`;
+        // await this.BD_Firmeasy.$queryRaw`ALTER TABLE historial_certificados ENABLE TRIGGER ALL;`;
 
         const lastHistoriaCertificado = await this.BD_Firmeasy.historial_certificados.findFirst({
             select: { id: true },
@@ -399,9 +935,9 @@ export class MainService {
 
     async migrateArchivosCertificadosFromGirasolToFirmeasy(): Promise<void> {
         
-        await this.BD_Firmeasy.$executeRaw`SET session_replication_role = 'replica';`;
+        // await this.BD_Firmeasy.$queryRaw`ALTER TABLE archivo_certificados DISABLE TRIGGER ALL;`;
 
-        await this.BD_Firmeasy.archivo_certificados.deleteMany();
+        // await this.BD_Firmeasy.archivo_certificados.deleteMany(); return Promise.resolve();
 
         await this.resetSequenceArchivoCertificado();
 
@@ -472,7 +1008,7 @@ export class MainService {
             }
         }
 
-        await this.BD_Firmeasy.$executeRaw`SET session_replication_role = 'origin';`;
+        // await this.BD_Firmeasy.$queryRaw`ALTER TABLE archivo_certificados ENABLE TRIGGER ALL;`;
 
         const lastArchivoCertificado = await this.BD_Firmeasy.archivo_certificados.findFirst({
             select: { id: true },
@@ -486,9 +1022,9 @@ export class MainService {
 
     async migrateSerieBillingFromGirasolToFirmeasy(): Promise<void> {
     
-        await this.BD_Firmeasy.$executeRaw`SET session_replication_role = 'replica';`;
+        // await this.BD_Firmeasy.$queryRaw`ALTER TABLE series DISABLE TRIGGER ALL;`;
 
-        await this.BD_Firmeasy.series.deleteMany();
+        // await this.BD_Firmeasy.series.deleteMany(); return Promise.resolve();
 
         await this.resetSequenceSerieBilling();
 
@@ -510,7 +1046,7 @@ export class MainService {
                 })),
             });
     
-            await this.BD_Firmeasy.$executeRaw`SET session_replication_role = 'origin';`;
+            // await this.BD_Firmeasy.$queryRaw`ALTER TABLE series ENABLE TRIGGER ALL;`;
     
             const lastSerieBilling = await this.BD_Firmeasy.series.findFirst({
                 select: { id: true },
@@ -523,11 +1059,13 @@ export class MainService {
 
             console.log('====================================');
             console.log('SerieBilling migrated successfully');
-            console.log('====================================');
+            console.log('====================================')
 
         } catch (error) {   
             console.log('Error inserting serieBilling:', error);
             console.log('serieBilling to insert:', serieBillingGirasol);
+
+            // await this.BD_Firmeasy.$queryRaw`ALTER TABLE series ENABLE TRIGGER ALL;`;
 
             throw error;
         }
@@ -535,9 +1073,9 @@ export class MainService {
 
     async migrateBillingsFromGirasolToFirmeasy(): Promise<void> {
     
-        await this.BD_Firmeasy.$executeRaw`SET session_replication_role = 'replica';`;
+        // await this.BD_Firmeasy.$queryRaw`ALTER TABLE factura_certificados DISABLE TRIGGER ALL;`;
 
-        await this.BD_Firmeasy.factura_certificados.deleteMany();
+        // await this.BD_Firmeasy.factura_certificados.deleteMany(); return Promise.resolve();
 
         await this.resetSequenceBilling();
 
@@ -606,7 +1144,7 @@ export class MainService {
             }
         }
 
-        await this.BD_Firmeasy.$executeRaw`SET session_replication_role = 'origin';`;
+        // await this.BD_Firmeasy.$queryRaw`ALTER TABLE factura_certificados ENABLE TRIGGER ALL;`;
 
         const lastBilling = await this.BD_Firmeasy.factura_certificados.findFirst({
             select: { id: true },
@@ -620,9 +1158,9 @@ export class MainService {
 
     async migratePagoCertificadoFromGirasolToFirmeasy(): Promise<void> {
     
-        await this.BD_Firmeasy.$executeRaw`SET session_replication_role = 'replica';`;
+        // await this.BD_Firmeasy.$queryRaw`ALTER TABLE pago_certificados DISABLE TRIGGER ALL;`;
 
-        await this.BD_Firmeasy.pago_certificados.deleteMany();
+        // await this.BD_Firmeasy.pago_certificados.deleteMany(); return Promise.resolve();
 
         await this.resetSequencePagoCertificado();
 
@@ -670,7 +1208,7 @@ export class MainService {
             }
         }
 
-        await this.BD_Firmeasy.$executeRaw`SET session_replication_role = 'origin';`;
+        // await this.BD_Firmeasy.$queryRaw`ALTER TABLE pago_certificados ENABLE TRIGGER ALL;`;
 
         const lastPago = await this.BD_Firmeasy.pago_certificados.findFirst({
             select: { id: true },
@@ -685,9 +1223,9 @@ export class MainService {
 
     async migrateVentasFromGirasolToFirmeasy(): Promise<void> {
     
-        await this.BD_Firmeasy.$executeRaw`SET session_replication_role = 'replica';`;
+        // await this.BD_Firmeasy.$queryRaw`SET session_replication_role = 'replica';`;
 
-        await this.BD_Firmeasy.ventas.deleteMany();
+        // await this.BD_Firmeasy.ventas.deleteMany(); return Promise.resolve();
 
         await this.resetSequenceVenta();
 
@@ -732,7 +1270,7 @@ export class MainService {
             }
         }
         
-        await this.BD_Firmeasy.$executeRaw`SET session_replication_role = 'origin';`;
+        // await this.BD_Firmeasy.$queryRaw`SET session_replication_role = 'origin';`;
 
         const lastVenta = await this.BD_Firmeasy.ventas.findFirst({
             select: { id: true },
@@ -899,6 +1437,34 @@ export class MainService {
 
     private async setSequenceUser(value: number): Promise<void> {
         await this.BD_Firmeasy.$queryRaw`SELECT setval('users_id_seq', ${value});`;
+    }
+
+    private async resetSequenceTipocertificado(): Promise<void> {
+        await this.BD_Firmeasy
+            .$executeRaw`ALTER SEQUENCE tipo_certificados_id_seq RESTART WITH 1;`;
+    }
+
+    private async resetSequenceBolsas(): Promise<void> {
+        await this.BD_Firmeasy
+            .$executeRaw`ALTER SEQUENCE bolsas_id_seq RESTART WITH 1;`;
+    }
+
+    private async setSequenceBolsas(value: number): Promise<void> {
+        await this.BD_Firmeasy.$queryRaw`SELECT setval('bolsas_id_seq', ${value});`;
+    }
+
+    private async resetSequenceAnticipos(): Promise<void> {
+        await this.BD_Firmeasy
+            .$executeRaw`ALTER SEQUENCE anticipos_id_seq RESTART WITH 1;`;
+    }
+
+    private async setSequenceAnticipos(value: number): Promise<void> {
+        await this.BD_Firmeasy.$queryRaw`SELECT setval('anticipos_id_seq', ${value});`;
+    }
+
+    private async setSequenceTipocertificado(value: number): Promise<void> {
+        await this.BD_Firmeasy
+            .$queryRaw`SELECT setval('tipo_certificados_id_seq', ${value});`;
     }
 
     private async resetSequenceAPI(): Promise<void> {

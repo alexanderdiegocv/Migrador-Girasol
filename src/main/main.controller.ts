@@ -13,6 +13,12 @@ export class MainController {
 
       await this.mainService.migrateUsersFromGirasolToFirmeasy();
 
+      await this.mainService.migrateTipoCertificadoFromGirasolToFirmeasy();
+
+      await this.mainService.migrateBolsasFromGirasolToFirmeasy();
+
+      await this.mainService.migrateAnticiposFromGirasolToFirmeasy();
+
       await this.mainService.migrateAPIFromGirasolToFirmeasy();
 
       await this.mainService.migratePlanCertificadoFromGirasolToFirmeasy();
