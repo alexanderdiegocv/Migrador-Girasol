@@ -902,7 +902,15 @@ export class MainService {
                 certificado_id: Number(historiaCertificado.certificado_id),
                 estado: historiaCertificado.estado,
                 codigo: historiaCertificado.codigo,
-                comentario: historiaCertificado.comentario,
+                comentario: (historiaCertificado.comentario === 'btn-outline-warning')
+                    ? 'warning' : (historiaCertificado.comentario === 'btn-outline-secondary')
+                        ? 'secondary' : (historiaCertificado.comentario === 'btn-outline-primary')
+                            ? 'primary' : (historiaCertificado.comentario === 'btn-outline-danger')
+                                ? 'danger' : (historiaCertificado.comentario === 'btn-outline-success')
+                                    ? 'success' : (historiaCertificado.comentario === 'btn-outline-info')
+                                        ? 'info' : (historiaCertificado.comentario === 'btn-outline-light')
+                                            ? 'light' : (historiaCertificado.comentario === 'btn-outline-dark')
+                                                ? 'dark' : historiaCertificado.comentario,
                 activo: historiaCertificado.activo === 'SI' ? 'S' : 'N',
                 user_id: (UsersId[String(historiaCertificado.certificado_id)] === undefined) ? 1 : UsersId[String(historiaCertificado.certificado_id)],
                 created_at: new Date(historiaCertificado.created_at),
