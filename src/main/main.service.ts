@@ -25,6 +25,32 @@ export class MainService {
 
     // Migrations
 
+    async verifyCertificados() {
+        // Aqui ya migre, y quiero verificar y todos los certificados de girasol estan en firmeasy
+        // const certificadosGirasol = await this.getAllCertificadosGirasol();
+
+        // const certificadosFirmeasy = await this.BD_Firmeasy.certificados.findMany();
+
+        // const certificadosGirasolId = certificadosGirasol.map((certificado) => certificado.id);
+
+        // const certificadosFirmeasyId = certificadosFirmeasy.map((certificado) => Number(certificado.id));
+
+        // const difference = certificadosGirasolId.filter((x) => !certificadosFirmeasyId.includes(Number(x)));
+
+        // return difference.length === 0;
+
+        // const result = await this.BD_Girasol.$queryRaw`
+        //     SELECT * FROM certificados
+        //     WHERE id NOT IN (SELECT id FROM certificados);
+        // `;
+
+        const result = await this.BD_Firmeasy.$queryRaw`
+            SELECT * FROM certificados
+            WHERE id NOT IN (SELECT id FROM certificados);
+        `;
+        console.log(result);
+    }
+
     async migrateUsersFromGirasolToFirmeasy(): Promise<void> {
         // await this.BD_Firmeasy.$queryRaw`ALTER TABLE users DISABLE TRIGGER ALL;`;
 

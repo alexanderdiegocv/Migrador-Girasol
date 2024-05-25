@@ -11,31 +11,33 @@ export class MainController {
 
     try {
 
-      await this.mainService.migrateUsersFromGirasolToFirmeasy();
+      return await this.mainService.verifyCertificados();
 
-      await this.mainService.migrateTipoCertificadoFromGirasolToFirmeasy();
+      // await this.mainService.migrateUsersFromGirasolToFirmeasy();
 
-      await this.mainService.migrateBolsasFromGirasolToFirmeasy();
+      // await this.mainService.migrateTipoCertificadoFromGirasolToFirmeasy();
 
-      await this.mainService.migrateAnticiposFromGirasolToFirmeasy();
+      // await this.mainService.migrateBolsasFromGirasolToFirmeasy();
 
-      await this.mainService.migrateAPIFromGirasolToFirmeasy();
+      // await this.mainService.migrateAnticiposFromGirasolToFirmeasy();
 
-      await this.mainService.migratePlanCertificadoFromGirasolToFirmeasy();
+      // await this.mainService.migrateAPIFromGirasolToFirmeasy();
 
-      await this.mainService.migrateCertificadosFromGirasolToFirmeasy();
+      // await this.mainService.migratePlanCertificadoFromGirasolToFirmeasy();
 
-      await this.mainService.migrateHistoriaCertificadoFromGirasolToFirmeasy();
+      // await this.mainService.migrateCertificadosFromGirasolToFirmeasy();
 
-      await this.mainService.migrateArchivosCertificadosFromGirasolToFirmeasy();
+      // await this.mainService.migrateHistoriaCertificadoFromGirasolToFirmeasy();
 
-      await this.mainService.migrateSerieBillingFromGirasolToFirmeasy();
+      // await this.mainService.migrateArchivosCertificadosFromGirasolToFirmeasy();
 
-      await this.mainService.migrateBillingsFromGirasolToFirmeasy();
+      // await this.mainService.migrateSerieBillingFromGirasolToFirmeasy();
 
-      await this.mainService.migratePagoCertificadoFromGirasolToFirmeasy();
+      // await this.mainService.migrateBillingsFromGirasolToFirmeasy();
 
-      await this.mainService.migrateVentasFromGirasolToFirmeasy();
+      // await this.mainService.migratePagoCertificadoFromGirasolToFirmeasy();
+
+      // await this.mainService.migrateVentasFromGirasolToFirmeasy();
 
       return {
         status: HttpStatus.OK,
